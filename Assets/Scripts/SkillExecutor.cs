@@ -1,173 +1,191 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// スキルの実行処理を統括するクラス。
-/// SkillDataに基づき、SFX・VFX再生や各種SkillTypeごとの処理を呼び出す。
-/// </summary>
-public class SkillExecutor : MonoBehaviour
+public enum HitShape
 {
-    /// <summary>
-    /// スキルを実行する。
-    /// </summary>
-    /// <param name="skill">実行するスキルデータ</param>
-    /// <param name="user">スキル使用者</param>
-    /// <param name="target">スキル対象</param>
-    public void ExecuteSkill(SkillData skill, GameObject user, GameObject target)
-    {
-        if (skill == null)
-        {
-            Debug.LogError("SkillData が null です。");
-            return;
-        }
-
-        // SFX / VFX の再生処理（遅延を考慮してコルーチン化）
-        StartCoroutine(PlaySkillEffects(skill));
-
-        // SkillTypeごとの処理（複数同時指定可能）
-        if (skill.SkillType001 > 0) ExecuteSkillType((SkillType)skill.SkillType001, skill, user, target, skill.EffectAmount001);
-        if (skill.SkillType002 > 0) ExecuteSkillType((SkillType)skill.SkillType002, skill, user, target, skill.EffectAmount002);
-        if (skill.SkillType003 > 0) ExecuteSkillType((SkillType)skill.SkillType003, skill, user, target, skill.EffectAmount003);
-        if (skill.SkillType004 > 0) ExecuteSkillType((SkillType)skill.SkillType004, skill, user, target, 0);
-    }
-
-    /// <summary>
-    /// SkillTypeごとに分岐して処理を実行。
-    /// </summary>
-    void ExecuteSkillType(SkillType type, SkillData skill, GameObject user, GameObject target, int amount)
-    {
-        switch (type)
-        {
-            case SkillType.Attack:
-                ExecuteAttack(skill, user, target, amount);
-                break;
-
-            case SkillType.Move:
-                ExecuteMove(skill, user, target, amount);
-                break;
-
-            case SkillType.Heal:
-                ExecuteHeal(skill, user, target, amount);
-                break;
-
-            case SkillType.Buff:
-                ExecuteBuff(skill, user, target, amount);
-                break;
-
-            default:
-                Debug.LogWarning($"未定義のSkillType: {type}");
-                break;
-        }
-    }
-
-    // ===============================================================
-    // ▼ 各SkillTypeの実処理（ここにアニメーション・判定処理などを追加していく）
-    // ===============================================================
-
-   void ExecuteAttack(SkillData skill, GameObject user, GameObject target, int amount)
-{
-    var casterParam = user.GetComponent<ParameterBase>();
-    var targetParam = target.GetComponent<ParameterBase>();
-
-    if (casterParam == null || targetParam == null)
-    {
-        Debug.LogWarning("ParameterBase が見つかりません。攻撃スキルを実行できません。");
-        return;
-    }
-
-    // --- ダメージ計算 ---
-    float multiplier = amount / 1000f; // 1000分率
-    int rawDamage = Mathf.RoundToInt(casterParam.Attack * multiplier);
-    int finalDamage = Mathf.Max(rawDamage - targetParam.Defense, 1);
-
-    // --- ダメージ適用 ---
-    targetParam.TakeDamage(finalDamage);
-
-    Debug.Log($"【攻撃スキル】{skill.SkillName} がヒット！ " +
-    $"{casterParam.Name} → {targetParam.Name} に {finalDamage} ダメージ！");
+    Box,
+    Capsule,
+    Ray
 }
 
-
-    void ExecuteMove(SkillData skill, GameObject user, GameObject target, int amount)
+[System.Serializable]
+public class SkillInstance
+{
+    public SkillData Data;
+    public ParameterBase Caster;
+    public ParameterBase Target;
+    public bool IsActive;
+    public float Timer;
+    public SkillInstance(SkillData data, ParameterBase caster, ParameterBase target)
     {
-        Debug.Log($"【移動スキル】{skill.SkillName} 発動。移動距離: {amount}");
-        // TODO: Rigidbody操作・ダッシュアニメ再生などをここに記述
+        Data = data;
+        Caster = caster;
+        Target = target;
+        IsActive = true;
+        Timer = 0f;
+    }
+}
+
+public class SkillExecutor : MonoBehaviour
+{
+    private List<SkillInstance> activeSkills = new List<SkillInstance>();
+
+    // スキル発動
+    public void ExecuteSkill(SkillData skill, ParameterBase caster, ParameterBase target)
+    {
+        SkillInstance instance = new SkillInstance(skill, caster, target);
+        activeSkills.Add(instance);
+
+        StartCoroutine(PlaySkillEffects(instance));
     }
 
-    void ExecuteHeal(SkillData skill, GameObject user, GameObject target, int amount)
+    private IEnumerator PlaySkillEffects(SkillInstance instance)
     {
-        Debug.Log($"【回復スキル】{skill.SkillName} 発動。回復量: {amount}");
-        // TODO: HP回復処理（targetのHealthComponentなどに加算）
+        // SFX001
+        if (!string.IsNullOrEmpty(instance.Data.UseSkillSFX001))
+        {
+            yield return new WaitForSeconds(instance.Data.DelayUseSkillSFX001);
+            Debug.Log($"Play SFX: {instance.Data.UseSkillSFX001}");
+        }
+
+        // SFX002
+        if (!string.IsNullOrEmpty(instance.Data.UseSkillSFX002))
+        {
+            yield return new WaitForSeconds(instance.Data.DelayUseSkillSFX002);
+            Debug.Log($"Play SFX: {instance.Data.UseSkillSFX002}");
+        }
+
+        // VFX001
+        if (!string.IsNullOrEmpty(instance.Data.UseSkillVFX001))
+        {
+            yield return new WaitForSeconds(instance.Data.DelayUseSkillVFX001);
+            Debug.Log($"Play VFX: {instance.Data.UseSkillVFX001}");
+        }
+
+        // VFX002
+        if (!string.IsNullOrEmpty(instance.Data.UseSkillVFX002))
+        {
+            yield return new WaitForSeconds(instance.Data.DelayUseSkillVFX002);
+            Debug.Log($"Play VFX: {instance.Data.UseSkillVFX002}");
+        }
+
+        // スキル効果適用
+        ApplySkillEffect(instance);
     }
 
-    void ExecuteBuff(SkillData skill, GameObject user, GameObject target, int amount)
+    private void ApplySkillEffect(SkillInstance instance)
     {
-        Debug.Log($"【バフスキル】{skill.SkillName} 発動。効果値: {amount}");
-        // TODO: ステータス上昇処理（攻撃力・防御力など）
-    }
+        // EffectAmount反映
+        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target);
+        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target);
+        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target);
+        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target);
 
-    // ===============================================================
-    // ▼ SFX / VFX の遅延再生処理
-    // ===============================================================
-
-    IEnumerator PlaySkillEffects(SkillData skill)
-    {
-        // --- SFX（効果音） ---
-        if (!string.IsNullOrEmpty(skill.UseSkillSFX001))
+        // 攻撃スキルならヒット判定
+        if (IsAttackSkill(instance.Data))
         {
-            yield return new WaitForSeconds(skill.DelayUseSkillSFX001);
-            PlaySFX(skill.UseSkillSFX001);
-        }
-
-        if (!string.IsNullOrEmpty(skill.UseSkillSFX002))
-        {
-            yield return new WaitForSeconds(skill.DelayUseSkillSFX002);
-            PlaySFX(skill.UseSkillSFX002);
-        }
-
-        // --- VFX（視覚エフェクト） ---
-        if (!string.IsNullOrEmpty(skill.UseSkillVFX001))
-        {
-            yield return new WaitForSeconds(skill.DelayUseSkillVFX001);
-            PlayVFX(skill.UseSkillVFX001);
-        }
-
-        if (!string.IsNullOrEmpty(skill.UseSkillVFX002))
-        {
-            yield return new WaitForSeconds(skill.DelayUseSkillVFX002);
-            PlayVFX(skill.UseSkillVFX002);
-        }
-    }
-
-    /// <summary>
-    /// 効果音を再生する（Resources/SFXフォルダを想定）
-    /// </summary>
-    void PlaySFX(string fileName)
-    {
-        AudioClip clip = Resources.Load<AudioClip>($"SFX/{fileName}");
-        if (clip != null)
-        {
-            AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-        }
-        else
-        {
-            Debug.LogWarning($"SFXファイルが見つかりません: {fileName}");
+            PerformHitDetection(instance);
         }
     }
 
-    /// <summary>
-    /// 視覚エフェクトを生成する（Resources/VFXフォルダを想定）
-    /// </summary>
-    void PlayVFX(string fileName)
+    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target)
     {
-        GameObject vfxPrefab = Resources.Load<GameObject>($"VFX/{fileName}");
-        if (vfxPrefab != null)
+        switch ((SkillType)skillType)
         {
-            Instantiate(vfxPrefab, Vector3.zero, Quaternion.identity);
-        }
-        else
-        {
-            Debug.LogWarning($"VFXファイルが見つかりません: {fileName}");
+            case SkillType.Attack:
+                target.CurrentHP = Mathf.Max(target.CurrentHP - skill.EffectAmount001, 0);
+                break;
+            case SkillType.Move:
+                target.MoveSpeed += skill.EffectAmount001;
+                break;
+            case SkillType.Heal:
+                target.CurrentHP = Mathf.Min(target.CurrentHP + skill.EffectAmount001, target.MaxHP);
+                break;
+            case SkillType.Buff:
+                target.Attack += skill.EffectAmount001;
+                target.Defense += skill.EffectAmount002;
+                target.MoveSpeed += skill.EffectAmount003;
+                break;
         }
     }
+
+    private bool IsAttackSkill(SkillData skill)
+    {
+        return skill.SkillType001 == (int)SkillType.Attack ||
+               skill.SkillType002 == (int)SkillType.Attack ||
+               skill.SkillType003 == (int)SkillType.Attack ||
+               skill.SkillType004 == (int)SkillType.Attack;
+    }
+
+    // 判定形状に応じた当たり判定
+    private void PerformHitDetection(SkillInstance instance)
+    {
+        Vector3 origin = instance.Caster.transform.position;
+        Vector3 direction = (instance.Target.transform.position - origin).normalized;
+        float range = 3f; // 判定距離
+        float radius = 0.5f; // 半径
+        Vector3 halfExtents = Vector3.one; // Boxサイズ
+
+        HitShape shape = HitShape.Box; // 今はBoxをデフォルト。スキルで設定可能
+
+        Collider[] hitColliders = null;
+
+        switch (shape)
+        {
+            case HitShape.Box:
+                hitColliders = Physics.OverlapBox(origin + direction * range / 2f, halfExtents, Quaternion.identity);
+                break;
+
+            case HitShape.Capsule:
+                hitColliders = Physics.OverlapCapsule(origin, origin + direction * range, radius);
+                break;
+
+            case HitShape.Ray:
+                RaycastHit hit;
+                if (Physics.Raycast(origin, direction, out hit, range))
+                {
+                    hitColliders = new Collider[] { hit.collider };
+                }
+                else
+                {
+                    hitColliders = new Collider[0];
+                }
+                break;
+        }
+
+        // ヒットした対象にダメージ
+        foreach (var col in hitColliders)
+        {
+            ParameterBase targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
+            if (targetParam != null)
+            {
+                targetParam.TakeDamage(instance.Data.EffectAmount001);
+                Debug.Log($"Hit {col.name}, Damage: {instance.Data.EffectAmount001}");
+            }
+        }
+    }
+
+    private void Update()
+    {
+        for (int i = activeSkills.Count - 1; i >= 0; i--)
+        {
+            SkillInstance inst = activeSkills[i];
+            if (!inst.IsActive) { activeSkills.RemoveAt(i); continue; }
+
+            inst.Timer += Time.deltaTime;
+
+            if (inst.Timer >= inst.Data.CoolTime / 1000f)
+            {
+                inst.IsActive = false;
+                Debug.Log($"Skill {inst.Data.SkillName} finished");
+            }
+        }
+    }
+}
+
+// 例: ParameterBaseを持たせるラッパー
+public class ParameterBaseHolder : MonoBehaviour
+{
+    public ParameterBase Parameter;
 }

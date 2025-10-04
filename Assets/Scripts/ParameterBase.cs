@@ -16,27 +16,29 @@ public class ParameterBase
     public int CriticalRate;    //　クリティカル率
     public int Defense;         //　防御力
     public int MoveSpeed;       //　移動速度
+    internal object transform;
+    public Vector3 Position;
 
 
 
     // 共通の処理
 
-public void TakeDamage(int damage)
-{
-    if (LimitOverHP > 0)
+    public void TakeDamage(int damage)
     {
-        // 上限超過分（LimitOverHP）から先に削る
-        int reduce = Mathf.Min(damage, LimitOverHP);
-        LimitOverHP -= reduce;
-        damage -= reduce;
-    }
+        if (LimitOverHP > 0)
+        {
+            // 上限超過分（LimitOverHP）から先に削る
+            int reduce = Mathf.Min(damage, LimitOverHP);
+            LimitOverHP -= reduce;
+            damage -= reduce;
+        }
 
-    if (damage > 0)
-    {
-        // 残りダメージは通常HPから
-        CurrentHP = Mathf.Max(CurrentHP - damage, 0);
+        if (damage > 0)
+        {
+            // 残りダメージは通常HPから
+            CurrentHP = Mathf.Max(CurrentHP - damage, 0);
+        }
     }
-}
 
     public void Heal(int amount)
     {
