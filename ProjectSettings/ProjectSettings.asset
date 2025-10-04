@@ -888,12 +888,12 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 0
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 6bbc7e04-d715-4d4c-b139-dba54c19a388
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
-  projectName: 
+  projectName: RougeActionGame 2025-09-29_21-20-13
   organizationId: syuntastg44
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
