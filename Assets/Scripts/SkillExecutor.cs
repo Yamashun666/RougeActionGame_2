@@ -15,6 +15,7 @@ public class SkillInstance
     public SkillData Data;
     public ParameterBase Caster;
     public ParameterBase Target;
+    public ParameterBase Position;
     public bool IsActive;
     public float Timer;
     public SkillInstance(SkillData data, ParameterBase caster, ParameterBase target)
@@ -121,8 +122,8 @@ public class SkillExecutor : MonoBehaviour
     // 判定形状に応じた当たり判定
     private void PerformHitDetection(SkillInstance instance)
     {
-        Vector3 origin = instance.Caster.transform.position;
-        Vector3 direction = (instance.Target.transform.position - origin).normalized;
+        Vector3 origin = instance.Caster.Position;
+        Vector3 direction = (instance.Target.Position - origin).normalized;
         float range = 3f; // 判定距離
         float radius = 0.5f; // 半径
         Vector3 halfExtents = Vector3.one; // Boxサイズ
