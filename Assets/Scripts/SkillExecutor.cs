@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -26,11 +27,14 @@ public class SkillInstance
         IsActive = true;
         Timer = 0f;
     }
+
 }
 
 public class SkillExecutor : MonoBehaviour
 {
     private List<SkillInstance> activeSkills = new List<SkillInstance>();
+    public AudioSource audioSource;
+    public Transform effectOrigin;
 
     // スキル発動
     public void ExecuteSkill(SkillData skill, ParameterBase caster, ParameterBase target)
@@ -39,8 +43,24 @@ public class SkillExecutor : MonoBehaviour
         activeSkills.Add(instance);
 
         StartCoroutine(PlaySkillEffects(instance));
+        ApplySkillEffect(instance);  // 効果の適用だけ
+        HandleSFX(skill);            // SFX処理だけ
+        HandleVFX(skill);            // VFX処理だけ
     }
-
+    private void HandleSFX(SkillData skill)
+    {
+        if (!string.IsNullOrEmpty(skill.UseSkillSFX001))
+            StartCoroutine(PlaySFXDelayed(skill.UseSkillSFX001, skill.DelayUseSkillSFX001));
+        if (!string.IsNullOrEmpty(skill.UseSkillSFX002))
+            StartCoroutine(PlaySFXDelayed(skill.UseSkillSFX002, skill.DelayUseSkillSFX002));
+    }
+        private void HandleVFX(SkillData skill)
+    {
+        if (!string.IsNullOrEmpty(skill.UseSkillVFX001))
+            StartCoroutine(PlayVFXDelayed(skill.UseSkillVFX001, skill.DelayUseSkillVFX001));
+        if (!string.IsNullOrEmpty(skill.UseSkillVFX002))
+            StartCoroutine(PlayVFXDelayed(skill.UseSkillVFX002, skill.DelayUseSkillVFX002));
+    }
     private IEnumerator PlaySkillEffects(SkillInstance instance)
     {
         // SFX001
@@ -74,7 +94,20 @@ public class SkillExecutor : MonoBehaviour
         // スキル効果適用
         ApplySkillEffect(instance);
     }
-
+    private IEnumerator PlaySFXDelayed(string sfxName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        AudioClip clip = Resources.Load<AudioClip>(sfxName);
+        if (clip != null && audioSource != null)
+            audioSource.PlayOneShot(clip);
+    }
+        private IEnumerator PlayVFXDelayed(string vfxName, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        GameObject prefab = Resources.Load<GameObject>(vfxName);
+        if (prefab != null && effectOrigin != null)
+            Instantiate(prefab, effectOrigin.position, Quaternion.identity);
+    }
     private void ApplySkillEffect(SkillInstance instance)
     {
         // EffectAmount反映
@@ -183,6 +216,12 @@ public class SkillExecutor : MonoBehaviour
             }
         }
     }
+
+    internal void ExecuteSkill()
+    {
+        throw new NotImplementedException();
+    }
+
 }
 
 // 例: ParameterBaseを持たせるラッパー

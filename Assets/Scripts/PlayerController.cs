@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 10f;
     public Transform groundCheck;
     public LayerMask groundLayer;
-    
+
 
     [Header("Attack Settings")]
     public SkillExecutor skillExecutor;
@@ -24,6 +24,12 @@ public class PlayerController : MonoBehaviour
     public SkillData DefaultAttackSkill;  // デフォルト攻撃スキル
     public ParameterBase PlayerParameter;  // プレイヤーのステータス
 
+        // 攻撃判定用
+    public Vector2 attackBoxSize = new Vector2(1f, 1f);
+    public Vector2 attackBoxOffset = new Vector2(1f, 0f);
+    public LayerMask enemyLayer;
+
+
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -31,11 +37,28 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        HandleInput();
+        HandleAnimation();
+
+    }
+        void HandleInput()
+    {
+        moveInput = Input.GetAxisRaw("Horizontal");
+
         HandleMovement();
         HandleJump();
         HandleAttack();
-        HandleInput();
-        HandleAnimation();
+    }
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
+        void HandleAnimation()
+    {
+        animator.SetFloat("Speed", Mathf.Abs(moveInput));
+        animator.SetBool("IsGrounded", isGrounded);
+        animator.SetFloat("VerticalVelocity", rb.linearVelocity.y);
     }
 
     // 横移動処理
@@ -51,6 +74,7 @@ public class PlayerController : MonoBehaviour
             Flip();
     }
 
+
     // ジャンプ処理
     void HandleJump()
     {
@@ -62,28 +86,12 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void HandleAnimation()
+        private void OnCollisionEnter2D(Collision2D collision)
     {
-        animator.SetFloat("Speed", Mathf.Abs(moveInput));
-        animator.SetBool("IsGrounded", isGrounded);
-        animator.SetFloat("VerticalVelocity", rb.linearVelocity.y);
-    }
-
-    void HandleInput()
-    {
-        moveInput = Input.GetAxisRaw("Horizontal");
-
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // 地面判定
+        if (collision.gameObject.CompareTag("Ground"))
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            isGrounded = false;
-        }
-
-        // 攻撃入力
-        if (Input.GetKeyDown(AttackKey) && DefaultAttackSkill != null)
-        {
-            // 攻撃スキルを実行
-            skillExecutor.ExecuteSkill(defaultAttackSkill, playerParameter, enemyParameter);
+            isGrounded = true;
         }
     }
 
@@ -92,15 +100,38 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (skillExecutor != null && defaultAttackSkill != null)
+            if (Input.GetKeyDown(KeyCode.J))
             {
-                // 攻撃実行
-                skillExecutor.ExecuteSkill(defaultAttackSkill, playerParameter, enemyParameter);
-                Debug.Log("Attack executed!");
+                ExecuteDefaultAttack();
             }
         }
     }
 
+    private void ExecuteDefaultAttack()
+    {
+        // スキル本体の処理
+        skillExecutor.ExecuteSkill(defaultAttackSkill, playerParameter, enemyParameter);
+
+        // 攻撃判定（Box型）
+        Vector2 boxCenter = (Vector2)transform.position + attackBoxOffset;
+        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, attackBoxSize, 0f, enemyLayer);
+
+        foreach (var hit in hits)
+        {
+            Damageable enemy = hit.GetComponent<Damageable>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(DefaultAttackSkill.EffectAmount001);
+                Debug.Log($"[Damage] {enemy.name} に {DefaultAttackSkill.EffectAmount001} ダメージ");
+            }
+        }
+
+        // 簡易ログとエフェクト呼び出し
+        Debug.Log($"[Skill Test] {DefaultAttackSkill.SkillName} 発動!");
+        Debug.Log($"EffectAmount001: {DefaultAttackSkill.EffectAmount001}");
+
+        // エフェクトやSFXはSkillExecutor内で処理させる想定
+    }
     // 向きを反転
     void Flip()
     {
@@ -110,5 +141,6 @@ public class PlayerController : MonoBehaviour
         transform.localScale = scaler;
     }
 }
+
 
 
