@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 public enum SkillType
 {
@@ -7,7 +8,9 @@ public enum SkillType
     Heal = 3,
     Buff = 4
 }
-public class SkillData
+[CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
+
+public class SkillData : ScriptableObject
 {
     public string SkillName;            // スキルの名称
     public string GroupCode;            // レベルすべてを包括したスキルのCODE
@@ -34,4 +37,6 @@ public class SkillData
     public string SkillEnhancementTable;// このスキルに渡すスキル成長テーブルの定義。Codeと同じ値を必ず渡すこと
     public string SkillIcon;            // このスキルのビジュアルアイコン。これのファイル名を検索し、UI上に表記。
     public string LevelUPSkillCode;     // レベルアップ時に渡すスキルのコード。Nullならレベルアップできる関数を呼ぶときにエラーを吐くようにしろ
+    public HitShape HitShapeType = HitShape.Box; // デフォルトは Box
+
 }

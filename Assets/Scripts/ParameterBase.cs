@@ -17,7 +17,8 @@ public class ParameterBase
     public int Defense;         //　防御力
     public int MoveSpeed;       //　移動速度
     internal object transform;
-    public Vector3 Position;
+    public Transform Transform;
+    public Vector3 Position => Transform.position;
 
 
 

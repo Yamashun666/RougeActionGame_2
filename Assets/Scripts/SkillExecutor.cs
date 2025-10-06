@@ -54,7 +54,7 @@ public class SkillExecutor : MonoBehaviour
         if (!string.IsNullOrEmpty(skill.UseSkillSFX002))
             StartCoroutine(PlaySFXDelayed(skill.UseSkillSFX002, skill.DelayUseSkillSFX002));
     }
-        private void HandleVFX(SkillData skill)
+    private void HandleVFX(SkillData skill)
     {
         if (!string.IsNullOrEmpty(skill.UseSkillVFX001))
             StartCoroutine(PlayVFXDelayed(skill.UseSkillVFX001, skill.DelayUseSkillVFX001));
@@ -101,7 +101,7 @@ public class SkillExecutor : MonoBehaviour
         if (clip != null && audioSource != null)
             audioSource.PlayOneShot(clip);
     }
-        private IEnumerator PlayVFXDelayed(string vfxName, float delay)
+    private IEnumerator PlayVFXDelayed(string vfxName, float delay)
     {
         yield return new WaitForSeconds(delay);
         GameObject prefab = Resources.Load<GameObject>(vfxName);
@@ -122,6 +122,48 @@ public class SkillExecutor : MonoBehaviour
             PerformHitDetection(instance);
         }
     }
+    // 既存の古い PerformHitDetection は削除
+    // 新しい PerformHitDetection に差し替え
+    private void PerformHitDetection(SkillInstance instance)
+    {
+        Vector3 origin = instance.Caster.Position;
+        Vector3 direction = (instance.Target.Position - origin).normalized;
+        float range = 3f;
+        float radius = 0.5f;
+        Vector3 halfExtents = Vector3.one;
+
+        HitShape shape = instance.Data.HitShapeType; // スキルごとの判定形状
+
+        Collider[] hitColliders = null;
+
+        switch (shape)
+        {
+            case HitShape.Box:
+                hitColliders = Physics.OverlapBox(origin + direction * range / 2f, halfExtents, Quaternion.identity);
+                break;
+            case HitShape.Capsule:
+                hitColliders = Physics.OverlapCapsule(origin, origin + direction * range, radius);
+                break;
+            case HitShape.Ray:
+                RaycastHit hit;
+                if (Physics.Raycast(origin, direction, out hit, range))
+                    hitColliders = new Collider[] { hit.collider };
+                else
+                    hitColliders = new Collider[0];
+                break;
+        }
+
+        foreach (var col in hitColliders)
+        {
+            ParameterBase targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
+            if (targetParam != null)
+            {
+                targetParam.TakeDamage(instance.Data.EffectAmount001);
+                Debug.Log($"Hit {col.name}, Damage: {instance.Data.EffectAmount001}");
+            }
+        }
+    }
+
 
     private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target)
     {
@@ -141,62 +183,6 @@ public class SkillExecutor : MonoBehaviour
                 target.Defense += skill.EffectAmount002;
                 target.MoveSpeed += skill.EffectAmount003;
                 break;
-        }
-    }
-
-    private bool IsAttackSkill(SkillData skill)
-    {
-        return skill.SkillType001 == (int)SkillType.Attack ||
-               skill.SkillType002 == (int)SkillType.Attack ||
-               skill.SkillType003 == (int)SkillType.Attack ||
-               skill.SkillType004 == (int)SkillType.Attack;
-    }
-
-    // 判定形状に応じた当たり判定
-    private void PerformHitDetection(SkillInstance instance)
-    {
-        Vector3 origin = instance.Caster.Position;
-        Vector3 direction = (instance.Target.Position - origin).normalized;
-        float range = 3f; // 判定距離
-        float radius = 0.5f; // 半径
-        Vector3 halfExtents = Vector3.one; // Boxサイズ
-
-        HitShape shape = HitShape.Box; // 今はBoxをデフォルト。スキルで設定可能
-
-        Collider[] hitColliders = null;
-
-        switch (shape)
-        {
-            case HitShape.Box:
-                hitColliders = Physics.OverlapBox(origin + direction * range / 2f, halfExtents, Quaternion.identity);
-                break;
-
-            case HitShape.Capsule:
-                hitColliders = Physics.OverlapCapsule(origin, origin + direction * range, radius);
-                break;
-
-            case HitShape.Ray:
-                RaycastHit hit;
-                if (Physics.Raycast(origin, direction, out hit, range))
-                {
-                    hitColliders = new Collider[] { hit.collider };
-                }
-                else
-                {
-                    hitColliders = new Collider[0];
-                }
-                break;
-        }
-
-        // ヒットした対象にダメージ
-        foreach (var col in hitColliders)
-        {
-            ParameterBase targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
-            if (targetParam != null)
-            {
-                targetParam.TakeDamage(instance.Data.EffectAmount001);
-                Debug.Log($"Hit {col.name}, Damage: {instance.Data.EffectAmount001}");
-            }
         }
     }
 
@@ -221,6 +207,13 @@ public class SkillExecutor : MonoBehaviour
     {
         throw new NotImplementedException();
     }
+    private bool IsAttackSkill(SkillData skill)
+{
+    return skill.SkillType001 == (int)SkillType.Attack ||
+           skill.SkillType002 == (int)SkillType.Attack ||
+           skill.SkillType003 == (int)SkillType.Attack ||
+           skill.SkillType004 == (int)SkillType.Attack;
+}
 
 }
 
@@ -229,3 +222,4 @@ public class ParameterBaseHolder : MonoBehaviour
 {
     public ParameterBase Parameter;
 }
+
