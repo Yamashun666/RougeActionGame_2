@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Game.SkillSystem;
 
 public enum SkillType
 {
@@ -37,6 +38,6 @@ public class SkillData : ScriptableObject
     public string SkillEnhancementTable;// このスキルに渡すスキル成長テーブルの定義。Codeと同じ値を必ず渡すこと
     public string SkillIcon;            // このスキルのビジュアルアイコン。これのファイル名を検索し、UI上に表記。
     public string LevelUPSkillCode;     // レベルアップ時に渡すスキルのコード。Nullならレベルアップできる関数を呼ぶときにエラーを吐くようにしろ
-    public HitShape HitShapeType = HitShape.Box; // デフォルトは Box
+    public HitShape HitShapeType; // 攻撃判定の形状
 
 }
