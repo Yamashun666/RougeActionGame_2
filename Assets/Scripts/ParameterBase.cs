@@ -63,6 +63,7 @@ public class ParameterBase : MonoBehaviour
                 OnDeath();
             }
         }
+        
     }
 
     /// <summary>

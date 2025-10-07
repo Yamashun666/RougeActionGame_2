@@ -8,6 +8,9 @@ public class Damageable : MonoBehaviour
     public void ApplyDamage(int damage)
     {
         HP -= damage;
+
+        // 点滅演出
+        GetComponent<SpriteFlashOnDamage>()?.Flash();
         Debug.Log($"{gameObject.name} が {damage} ダメージを受けた！ 残りHP: {HP}");
         if (HP <= 0) Die();
     }
@@ -33,6 +36,7 @@ public class Damageable : MonoBehaviour
         if (parameterBase.CurrentHP <= 0)
         {
             Die();
+            GetComponent<DeathEffectHandler>()?.TriggerDeath();
         }
 }
 }
