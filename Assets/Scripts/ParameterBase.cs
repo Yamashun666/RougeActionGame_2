@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -33,6 +34,8 @@ public class ParameterBase : MonoBehaviour
     [Header("位置・参照")]
     public Transform ModelRoot;     // 見た目やVFX発生位置の基準
     public Vector3 Position => ModelRoot ? ModelRoot.position : transform.position;
+    public event Action OnDeath;
+
 
     // ========================================
     //  基本ロジック
@@ -60,10 +63,10 @@ public class ParameterBase : MonoBehaviour
             CurrentHP = Mathf.Max(CurrentHP - damage, 0);
             if (CurrentHP <= 0)
             {
-                OnDeath();
+                OnDeath?.Invoke();
             }
         }
-        
+
     }
 
     /// <summary>
@@ -88,11 +91,6 @@ public class ParameterBase : MonoBehaviour
     /// <summary>
     /// キャラクター死亡時の処理。
     /// </summary>
-    protected virtual void OnDeath()
-    {
-        Debug.Log($"{Name} は倒れた！");
-        // 死亡アニメーションや削除処理をここで呼ぶ
-    }
 
     /// <summary>
     /// ステータスの現在値を取得（ログ・デバッグ用）
