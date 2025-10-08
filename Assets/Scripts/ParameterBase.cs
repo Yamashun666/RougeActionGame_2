@@ -35,6 +35,8 @@ public class ParameterBase : MonoBehaviour
     public Transform ModelRoot;     // 見た目やVFX発生位置の基準
     public Vector3 Position => ModelRoot ? ModelRoot.position : transform.position;
     public event Action OnDeath;
+    public DamagePopupSpawner popupSpawner;
+
 
 
     // ========================================
@@ -49,7 +51,7 @@ public class ParameterBase : MonoBehaviour
     {
         if (damage <= 0) return;
 
-        // 上限超過HPを優先して削る
+        // LimitOver優先で削る
         if (LimitOverHP > 0)
         {
             int reduce = Mathf.Min(damage, LimitOverHP);
@@ -57,17 +59,15 @@ public class ParameterBase : MonoBehaviour
             damage -= reduce;
         }
 
-        // 残りダメージは通常HPへ
         if (damage > 0)
         {
             CurrentHP = Mathf.Max(CurrentHP - damage, 0);
-            if (CurrentHP <= 0)
-            {
-                OnDeath?.Invoke();
-            }
-        }
+            popupSpawner?.ShowPopup(damage, false, false); // 💥 ダメージ表示！
 
-    }
+            if (CurrentHP <= 0)
+                OnDeath?.Invoke();
+        }
+}
 
     /// <summary>
     /// 回復処理。HP上限を超える場合はLimitOverHPに加算。
