@@ -1,75 +1,70 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(SpriteRenderer))]
+/// <summary>
+/// キャラクター死亡時の演出・破棄処理を一元管理するハンドラー。
+/// ParameterBase.OnDeath イベントに自動で登録される。
+/// </summary>
 public class DeathEffectHandler : MonoBehaviour
 {
-    public string deathVFXName;
-    public string deathSFXName;
-    public float destroyDelay = 0.5f;
+    [Header("エフェクト関連")]
+    public GameObject deathVFXPrefab;    // 死亡時のエフェクトPrefab
+    public AudioClip deathSFX;           // 死亡時の効果音
+    public float destroyDelay = 1.5f;    // 破棄までの遅延時間
 
-    private SpriteRenderer spriteRenderer;
     private AudioSource audioSource;
-    private ParameterBase parameterBase;
-    private bool isDead = false;
+    private ParameterBase parameter;
 
-    void Awake()
+    private void Awake()
     {
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        audioSource = gameObject.AddComponent<AudioSource>();
-        parameterBase = GetComponent<ParameterBase>();
+        parameter = GetComponent<ParameterBase>();
+        audioSource = GetComponent<AudioSource>();
+
+        if (parameter != null)
+            parameter.OnDeath += TriggerDeath; // ← イベント登録
     }
 
-    void OnEnable()
+    private void OnDestroy()
     {
-        if (parameterBase != null)
-            parameterBase.OnDeath += TriggerDeath;
+        if (parameter != null)
+            parameter.OnDeath -= TriggerDeath;
     }
 
-    void OnDisable()
-    {
-        if (parameterBase != null)
-            parameterBase.OnDeath -= TriggerDeath;
-    }
-
+    /// <summary>
+    /// 死亡演出の呼び出し（ParameterBase.OnDeath から呼ばれる）
+    /// </summary>
     public void TriggerDeath()
     {
-        if (isDead) return;
-        isDead = true;
         StartCoroutine(HandleDeathSequence());
     }
 
+    /// <summary>
+    /// 実際の死亡シーケンス処理
+    /// </summary>
     private IEnumerator HandleDeathSequence()
     {
-        // 1️⃣ スプライトをフェードアウト
-        float fadeDuration = 0.3f;
-        float elapsed = 0f;
-        Color startColor = spriteRenderer.color;
-        while (elapsed < fadeDuration)
+        // VFX再生
+        if (deathVFXPrefab != null)
         {
-            elapsed += Time.deltaTime;
-            float alpha = Mathf.Lerp(1f, 0f, elapsed / fadeDuration);
-            spriteRenderer.color = new Color(startColor.r, startColor.g, startColor.b, alpha);
-            yield return null;
+            GameObject vfx = Instantiate(deathVFXPrefab, transform.position, Quaternion.identity);
+            Destroy(vfx, 2f);
         }
 
-        // 2️⃣ VFX再生
-        if (!string.IsNullOrEmpty(deathVFXName))
+        // SFX再生
+        if (deathSFX != null)
         {
-            GameObject vfxPrefab = Resources.Load<GameObject>(deathVFXName);
-            if (vfxPrefab != null)
-                Instantiate(vfxPrefab, transform.position, Quaternion.identity);
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
+
+            audioSource.PlayOneShot(deathSFX);
         }
 
-        // 3️⃣ SFX再生
-        if (!string.IsNullOrEmpty(deathSFXName))
-        {
-            AudioClip clip = Resources.Load<AudioClip>(deathSFXName);
-            if (clip != null)
-                audioSource.PlayOneShot(clip);
-        }
+        // HPバーなどUI破棄（自動で消したい場合）
+        HPBarUI_Triple bar = FindObjectOfType<HPBarUI_Triple>();
+        if (bar != null && bar.target == parameter)
+            Destroy(bar.gameObject);
 
-        // 4️⃣ 削除まで遅延
+        // 一定時間待ってからキャラ削除
         yield return new WaitForSeconds(destroyDelay);
         Destroy(gameObject);
     }
