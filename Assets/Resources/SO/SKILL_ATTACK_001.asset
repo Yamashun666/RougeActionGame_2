@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ea6b91433c2f8d40b1da3901c9e8e33, type: 3}
+  m_Name: SKILL_ATTACK_001
+  m_EditorClassIdentifier: Assembly-CSharp::SkillData
+  SkillName: Basic Attack
+  GroupCode: 0001
+  LevelCode: 0001_01
+  Rarity: 1
+  SkillType001: 1
+  SkillType002: 0
+  SkillType003: 0
+  SkillType004: 0
+  Type: 0
+  EffectAmount001: 50
+  EffectAmount002: 0
+  EffectAmount003: 0
+  CoolTime: 1000
+  LevelUP_LevelCode: 0
+  UseSkillSFX001: attack_swing
+  DelayUseSkillSFX001: 0
+  UseSkillSFX002: 
+  DelayUseSkillSFX002: 0
+  UseSkillVFX001: slash_hit
+  DelayUseSkillVFX001: 0
+  UseSkillVFX002: 
+  DelayUseSkillVFX002: 0
+  SkillEnhancementTable: SK_ATTACK_TABLE
+  SkillIcon: attack_basic
+  LevelUPSkillCode: 
+  HitShapeType: 0
