@@ -1,146 +1,97 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement Settings")]
+    [Header("移動設定")]
     public float moveSpeed = 5f;
-    public float jumpForce = 10f;
-    public Transform groundCheck;
+    public float jumpForce = 8f;
     public LayerMask groundLayer;
+    public Transform groundCheck;
 
-
-    [Header("Attack Settings")]
+    [Header("参照")]
+    public ParameterBase parameter;
     public SkillExecutor skillExecutor;
-    public SkillData defaultAttackSkill; // 仮の攻撃スキル処理
-    public ParameterBase playerParameter;
-    public ParameterBase enemyParameter; // ※仮のターゲット
-    private Animator animator;
-    private float moveInput;
+
     private Rigidbody2D rb;
+    private PlayerInputActions inputActions;
+    private Vector2 moveInput;
     private bool isGrounded;
-    private bool facingRight = true;
-    public KeyCode AttackKey = KeyCode.J; // 攻撃ボタン
-    public SkillData DefaultAttackSkill;  // デフォルト攻撃スキル
-    public ParameterBase PlayerParameter;  // プレイヤーのステータス
+    private bool jumpQueued;
+    private bool attackQueued;
 
-        // 攻撃判定用
-    public Vector2 attackBoxSize = new Vector2(1f, 1f);
-    public Vector2 attackBoxOffset = new Vector2(1f, 0f);
-    public LayerMask enemyLayer;
-
-
-    void Start()
+    void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        inputActions = new PlayerInputActions();
+
+        // 入力イベントの登録
+        inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
+
+        inputActions.Player.Jump.performed += ctx => jumpQueued = true;
+        inputActions.Player.Attack.performed += ctx => attackQueued = true;
     }
+
+    void OnEnable() => inputActions.Enable();
+    void OnDisable() => inputActions.Disable();
 
     void Update()
     {
-        HandleInput();
-        HandleAnimation();
-
-    }
-        void HandleInput()
-    {
-        moveInput = Input.GetAxisRaw("Horizontal");
-
         HandleMovement();
         HandleJump();
         HandleAttack();
     }
 
-    private void Awake()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
-        void HandleAnimation()
-    {
-        animator.SetFloat("Speed", Mathf.Abs(moveInput));
-        animator.SetBool("IsGrounded", isGrounded);
-        animator.SetFloat("VerticalVelocity", rb.linearVelocity.y);
-    }
-
-    // 横移動処理
     void HandleMovement()
     {
-        float move = Input.GetAxisRaw("Horizontal");
-        rb.linearVelocity = new Vector2(move * moveSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
 
-        // 向きの反転
-        if (move > 0 && !facingRight)
-            Flip();
-        else if (move < 0 && facingRight)
-            Flip();
+        if (moveInput.x != 0)
+            transform.localScale = new Vector3(Mathf.Sign(moveInput.x), 1, 1);
     }
 
-
-    // ジャンプ処理
     void HandleJump()
     {
+        if (groundCheck == null) return;
+
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (jumpQueued && isGrounded)
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
         }
+
+        jumpQueued = false;
     }
 
-        private void OnCollisionEnter2D(Collision2D collision)
-    {
-        // 地面判定
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
-    }
-
-    // 攻撃処理
     void HandleAttack()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (!attackQueued) return;
+
+        SkillData skill = SkillDatabase.Instance.GetSkill("BasicAttack");
+        if (skill != null && skillExecutor != null)
         {
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                ExecuteDefaultAttack();
-            }
-        }
-    }
-
-    private void ExecuteDefaultAttack()
-    {
-        // スキル本体の処理
-        skillExecutor.ExecuteSkill(defaultAttackSkill, playerParameter, enemyParameter);
-
-        // 攻撃判定（Box型）
-        Vector2 boxCenter = (Vector2)transform.position + attackBoxOffset;
-        Collider2D[] hits = Physics2D.OverlapBoxAll(boxCenter, attackBoxSize, 0f, enemyLayer);
-
-        foreach (var hit in hits)
-        {
-            Damageable enemy = hit.GetComponent<Damageable>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(DefaultAttackSkill.EffectAmount001);
-                Debug.Log($"[Damage] {enemy.name} に {DefaultAttackSkill.EffectAmount001} ダメージ");
-            }
+            skillExecutor.ExecuteSkill(skill, parameter, FindTarget());
         }
 
-        // 簡易ログとエフェクト呼び出し
-        Debug.Log($"[Skill Test] {DefaultAttackSkill.SkillName} 発動!");
-        Debug.Log($"EffectAmount001: {DefaultAttackSkill.EffectAmount001}");
-
-        // エフェクトやSFXはSkillExecutor内で処理させる想定
+        attackQueued = false;
     }
-    // 向きを反転
-    void Flip()
+
+    ParameterBase FindTarget()
     {
-        facingRight = !facingRight;
-        Vector3 scaler = transform.localScale;
-        scaler.x *= -1;
-        transform.localScale = scaler;
+        Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, 3f, LayerMask.GetMask("Enemy"));
+        return hit.collider ? hit.collider.GetComponent<ParameterBase>() : null;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(groundCheck.position, 0.1f);
+        }
     }
 }
-
-
-
