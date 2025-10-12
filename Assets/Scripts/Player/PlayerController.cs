@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -13,14 +14,18 @@ public class PlayerController : MonoBehaviour
     [Header("参照")]
     public ParameterBase parameter;
     public SkillExecutor skillExecutor;
-
+    Vector2 rightForce = new Vector2(10.0f, 0);
+    Vector2 leftForce = new Vector2(-10.0f, 0);
     private Rigidbody2D rb;
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
     private bool isGrounded;
     private bool jumpQueued;
     private bool attackQueued;
-
+    void Start()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -46,10 +51,16 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
-
-        if (moveInput.x != 0)
-            transform.localScale = new Vector3(Mathf.Sign(moveInput.x), 1, 1);
+        if (Input.GetKey(KeyCode.A))
+        {
+            rb.AddForce(leftForce, ForceMode2D.Force);
+            UnityEngine.Debug.Log("LeftMoving");
+        }
+        if (Input.GetKey(KeyCode.D))
+        {
+            rb.AddForce(rightForce, ForceMode2D.Force);
+            UnityEngine.Debug.Log("RightMoving");
+        }
     }
 
     void HandleJump()

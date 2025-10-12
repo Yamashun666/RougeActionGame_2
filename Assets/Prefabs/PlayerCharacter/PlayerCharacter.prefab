@@ -11686,22 +11686,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   moveSpeed: 5
   jumpForce: 10
-  groundCheck: {fileID: 0}
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
+  groundCheck: {fileID: 0}
+  parameter: {fileID: 0}
   skillExecutor: {fileID: 0}
-  defaultAttackSkill: {fileID: 0}
-  playerParameter: {fileID: 0}
-  enemyParameter: {fileID: 0}
-  AttackKey: 106
-  DefaultAttackSkill: {fileID: 0}
-  PlayerParameter: {fileID: 0}
-  attackBoxSize: {x: 1, y: 1}
-  attackBoxOffset: {x: 1, y: 0}
-  enemyLayer:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!61 &7563531507553422877
 BoxCollider2D:
   m_ObjectHideFlags: 0

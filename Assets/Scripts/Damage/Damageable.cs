@@ -1,10 +1,11 @@
 using UnityEngine;
+using DG.Tweening;
 
 public class Damageable : MonoBehaviour
 {
     public int HP = 100;
     public ParameterBase parameterBase;
-
+    public UIFader uIFader;
     public void ApplyDamage(int damage)
     {
         HP -= damage;
@@ -38,5 +39,9 @@ public class Damageable : MonoBehaviour
             Die();
             GetComponent<DeathEffectHandler>()?.TriggerDeath();
         }
-}
+        uIFader.UIFadeIn();
+        Invoke(nameof(uIFader.UIFadeOut), 3.0f);
+    }
+
+
 }
