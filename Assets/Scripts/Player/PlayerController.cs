@@ -34,9 +34,11 @@ public class PlayerController : MonoBehaviour
         // 入力イベントの登録
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
         inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
-
         inputActions.Player.Jump.performed += ctx => jumpQueued = true;
         inputActions.Player.Attack.performed += ctx => attackQueued = true;
+
+        SkillDatabase.Initialize(); // ← これで自動ロード
+
     }
 
     void OnEnable() => inputActions.Enable();
@@ -79,6 +81,8 @@ public class PlayerController : MonoBehaviour
 
     void HandleAttack()
     {
+        if (skillExecutor == null) UnityEngine.Debug.LogError("SkillExecutor が未設定！");
+        if (SkillDatabase.Instance == null) UnityEngine.Debug.LogError("SkillDatabase.Instance が未設定！");
         if (!attackQueued) return;
 
         SkillData skill = SkillDatabase.Instance.GetSkill("BasicAttack");
