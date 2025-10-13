@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 using DG.Tweening;
 
 public class UIFader : MonoBehaviour
@@ -30,6 +31,12 @@ public class UIFader : MonoBehaviour
                     c.a = 0f; // 完全に透明
                     img.color = c;
                 }
+            }
+        if (EventSystem.current == null)
+            {
+                GameObject obj = new GameObject("EventSystem");
+                obj.AddComponent<EventSystem>();
+                obj.AddComponent<StandaloneInputModule>();
             }
         }
     }

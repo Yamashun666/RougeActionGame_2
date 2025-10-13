@@ -5,8 +5,8 @@ using UnityEngine.InputSystem;
 public class PlayerController : MonoBehaviour
 {
     [Header("移動設定")]
-    public float moveSpeed = 5f;
-    public float jumpForce = 8f;
+    public float moveSpeed = 8f;
+    public float jumpForce = 20f;
     public LayerMask groundLayer;
     public Transform groundCheck;
 
@@ -43,7 +43,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        UnityEngine.Debug.Log(isGrounded);
+        //UnityEngine.Debug.Log(isGrounded);
         HandleMovement();
         HandleJump();
     }
@@ -55,7 +55,7 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 moveForce = new Vector2(moveInput.x * moveSpeed, 0f);
             rb.AddForce(moveForce, ForceMode2D.Force);
-            Debug.Log(moveInput.x > 0 ? "RightMoving" : "LeftMoving");
+            //Debug.Log(moveInput.x > 0 ? "RightMoving" : "LeftMoving");
         }
     }
 
@@ -76,6 +76,7 @@ public class PlayerController : MonoBehaviour
     private void HandleAttack()
     {
         var skill = SkillDatabase.Instance.GetSkill("0001_01");
+        UnityEngine.Debug.Log("攻撃したンゴ");
         if (skill == null)
         {
             Debug.LogError("SkillDatabase に 0001_01 が存在しません！");
