@@ -2,12 +2,14 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags:
   - LevelBounds
   - Music
   - Background
   - NoMask
+  - Enemy
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -38,7 +40,7 @@ TagManager:
   - MidHeightOneWayPlatforms
   - Pushables
   - Stairs
-  - 
+  - Ground
   - 
   - 
   m_SortingLayers:
@@ -66,3 +68,5 @@ TagManager:
   - name: UI
     uniqueID: 3241408355
     locked: 0
+  m_RenderingLayers:
+  - Default

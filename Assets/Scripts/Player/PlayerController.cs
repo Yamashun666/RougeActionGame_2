@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        UnityEngine.Debug.Log(isGrounded);
         HandleMovement();
         HandleJump();
     }
@@ -66,10 +67,10 @@ public class PlayerController : MonoBehaviour
 
         if (jumpQueued && isGrounded)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            jumpQueued = false;
         }
 
-        jumpQueued = false;
     }
 
     private void HandleAttack()
