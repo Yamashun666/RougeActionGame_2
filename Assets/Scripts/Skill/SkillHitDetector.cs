@@ -1,15 +1,27 @@
 using UnityEngine;
 using Game.SkillSystem;
+using System;
 
 /// <summary>
-/// スキルの攻撃判定を行うクラス。
-/// 判定形状：Box / Capsule / Ray に対応。
+/// スキルのヒット判定を担当する汎用クラス。
+/// Transform に依存せず、呼び出し側から位置情報を渡す構造。
 /// </summary>
 public class SkillHitDetector
 {
-    public void PerformHitDetection(SkillInstance instance)
+    /// <summary>
+    /// スキルのヒット判定を実行。
+    /// </summary>
+    /// <param name="instance">スキルインスタンス</param>
+    /// <param name="originTransform">発生元Transform（例：プレイヤー）</param>
+    public void PerformHitDetection(SkillInstance instance, Transform originTransform)
     {
-        Vector3 origin = instance.Caster.Position;
+        if (instance == null || originTransform == null)
+        {
+            Debug.LogWarning("[SkillHitDetector] Invalid call: instance or originTransform is null");
+            return;
+        }
+
+        Vector3 origin = originTransform.position;
         Vector3 direction = (instance.Target.Position - origin).normalized;
         float range = 3f;
         float radius = 0.5f;
@@ -27,7 +39,11 @@ public class SkillHitDetector
                 hitColliders = Physics.OverlapCapsule(origin, origin + direction * range, radius);
                 break;
             case HitShape.Ray:
-                hitColliders = PerformRaycast(origin, direction, range);
+                RaycastHit hit;
+                if (Physics.Raycast(origin, direction, out hit, range))
+                    hitColliders = new Collider[] { hit.collider };
+                else
+                    hitColliders = new Collider[0];
                 break;
         }
 
@@ -36,16 +52,16 @@ public class SkillHitDetector
             ParameterBase targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
             if (targetParam != null)
             {
+                int beforeHP = targetParam.CurrentHP;
                 targetParam.TakeDamage(instance.Data.EffectAmount001);
-                Debug.Log($"Hit {col.name}, Damage: {instance.Data.EffectAmount001}");
+                Debug.Log($"[Hit] {col.name} に {instance.Data.EffectAmount001} ダメージ！ {beforeHP} → {targetParam.CurrentHP}");
             }
         }
     }
 
-    private Collider[] PerformRaycast(Vector3 origin, Vector3 direction, float range)
+    internal void PerformHitDetection(SkillInstance instance)
     {
-        if (Physics.Raycast(origin, direction, out RaycastHit hit, range))
-            return new Collider[] { hit.collider };
-        return new Collider[0];
+        throw new NotImplementedException();
     }
+
 }

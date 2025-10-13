@@ -13,7 +13,7 @@ public class SkillEffectHandler
         // 攻撃スキルならヒット判定
         if (IsAttackSkill(instance.Data))
         {
-            hitDetector.PerformHitDetection(instance);
+            hitDetector.PerformHitDetection(instance, instance.Caster.ModelRoot);
         }
     }
 

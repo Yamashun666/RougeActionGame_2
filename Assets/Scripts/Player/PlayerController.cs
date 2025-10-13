@@ -76,7 +76,8 @@ public class PlayerController : MonoBehaviour
     private void HandleAttack()
     {
         var skill = SkillDatabase.Instance.GetSkill("0001_01");
-        UnityEngine.Debug.Log("攻撃したンゴ");
+        Debug.Log($"[Player] スキル発動！ {skill.SkillName} ({skill.LevelCode})");
+
         if (skill == null)
         {
             Debug.LogError("SkillDatabase に 0001_01 が存在しません！");

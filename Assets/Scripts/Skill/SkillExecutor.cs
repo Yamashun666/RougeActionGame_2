@@ -70,9 +70,9 @@ public class SkillExecutor : MonoBehaviour
         ApplyEffectAmount(skill.SkillType004, skill, target);
 
         // 攻撃スキルならヒット判定
-        if (IsAttackSkill(skill))
+        if (IsAttackSkill(instance.Data))
         {
-            hitDetector.PerformHitDetection(instance);
+            hitDetector.PerformHitDetection(instance, instance.Caster.ModelRoot);
         }
     }
 
