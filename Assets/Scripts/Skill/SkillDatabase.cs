@@ -4,30 +4,19 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "SkillDatabase", menuName = "Database/SkillDatabase")]
 public class SkillDatabase : ScriptableObject
 {
-    // ======== シングルトン管理 ========
     public static SkillDatabase Instance { get; private set; }
 
-    // ======== 登録スキル一覧 ========
     [Header("登録されているスキルリスト")]
     public List<SkillData> skills = new List<SkillData>();
 
-    // ======== 初期化処理 ========
     private void OnEnable()
     {
-        // ScriptableObjectがロードされた際にInstanceを登録
         Instance = this;
     }
 
-    /// <summary>
-    /// 手動初期化関数（Resourcesからロード）
-    /// </summary>
     public static void Initialize()
     {
-        if (Instance != null)
-        {
-            Debug.Log("[SkillDatabase] すでに初期化済みです。");
-            return;
-        }
+        if (Instance != null) return;
 
         SkillDatabase db = Resources.Load<SkillDatabase>("SkillDatabase");
         if (db != null)
@@ -42,14 +31,14 @@ public class SkillDatabase : ScriptableObject
     }
 
     /// <summary>
-    /// スキル名からスキルデータを取得
+    /// LevelCodeでスキルを検索
     /// </summary>
-    public SkillData GetSkill(string skillName)
+    public SkillData GetSkill(string levelCode)
     {
-        SkillData result = skills.Find(s => s.SkillName == skillName);
+        SkillData result = skills.Find(s => s.LevelCode == levelCode);
         if (result == null)
         {
-            Debug.LogWarning($"[SkillDatabase] Skill '{skillName}' が見つかりません。");
+            Debug.LogWarning($"[SkillDatabase] Skill(LevelCode='{levelCode}') が見つかりません。");
         }
         return result;
     }

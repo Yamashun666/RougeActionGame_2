@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ea6b91433c2f8d40b1da3901c9e8e33, type: 3}
-  m_Name: SKILL_ATTACK_001
+  m_Name: BasicAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   SkillName: Basic Attack
   GroupCode: 0001

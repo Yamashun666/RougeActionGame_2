@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,31 +13,29 @@ public class PlayerController : MonoBehaviour
     [Header("参照")]
     public ParameterBase parameter;
     public SkillExecutor skillExecutor;
-    Vector2 rightForce = new Vector2(10.0f, 0);
-    Vector2 leftForce = new Vector2(-10.0f, 0);
+
     private Rigidbody2D rb;
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
     private bool isGrounded;
     private bool jumpQueued;
-    private bool attackQueued;
-    void Start()
-    {
-        rb = GetComponent<Rigidbody2D>();
-    }
+    private ParameterBase playerParam;
+
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        playerParam = GetComponent<ParameterBase>();
+
         inputActions = new PlayerInputActions();
+        inputActions.Player.Enable();
 
-        // 入力イベントの登録
+        // 入力イベント登録
         inputActions.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        inputActions.Player.Move.canceled += ctx => moveInput = Vector2.zero;
-        inputActions.Player.Jump.performed += ctx => jumpQueued = true;
-        inputActions.Player.Attack.performed += ctx => attackQueued = true;
+        inputActions.Player.Move.canceled += _ => moveInput = Vector2.zero;
+        inputActions.Player.Jump.performed += _ => jumpQueued = true;
+        inputActions.Player.Attack.performed += _ => HandleAttack();
 
-        SkillDatabase.Initialize(); // ← これで自動ロード
-
+        SkillDatabase.Initialize();
     }
 
     void OnEnable() => inputActions.Enable();
@@ -48,20 +45,16 @@ public class PlayerController : MonoBehaviour
     {
         HandleMovement();
         HandleJump();
-        HandleAttack();
     }
 
     void HandleMovement()
     {
-        if (Input.GetKey(KeyCode.A))
+        // AddForce方式を維持して、InputSystem入力を反映
+        if (moveInput.x != 0)
         {
-            rb.AddForce(leftForce, ForceMode2D.Force);
-            UnityEngine.Debug.Log("LeftMoving");
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            rb.AddForce(rightForce, ForceMode2D.Force);
-            UnityEngine.Debug.Log("RightMoving");
+            Vector2 moveForce = new Vector2(moveInput.x * moveSpeed, 0f);
+            rb.AddForce(moveForce, ForceMode2D.Force);
+            Debug.Log(moveInput.x > 0 ? "RightMoving" : "LeftMoving");
         }
     }
 
@@ -79,26 +72,16 @@ public class PlayerController : MonoBehaviour
         jumpQueued = false;
     }
 
-    void HandleAttack()
+    private void HandleAttack()
     {
-        if (skillExecutor == null) UnityEngine.Debug.LogError("SkillExecutor が未設定！");
-        if (SkillDatabase.Instance == null) UnityEngine.Debug.LogError("SkillDatabase.Instance が未設定！");
-        if (!attackQueued) return;
-
-        SkillData skill = SkillDatabase.Instance.GetSkill("BasicAttack");
-        if (skill != null && skillExecutor != null)
+        var skill = SkillDatabase.Instance.GetSkill("0001_01");
+        if (skill == null)
         {
-            skillExecutor.ExecuteSkill(skill, parameter, FindTarget());
+            Debug.LogError("SkillDatabase に 0001_01 が存在しません！");
+            return;
         }
 
-        attackQueued = false;
-    }
-
-    ParameterBase FindTarget()
-    {
-        Vector2 dir = transform.localScale.x > 0 ? Vector2.right : Vector2.left;
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, dir, 3f, LayerMask.GetMask("Enemy"));
-        return hit.collider ? hit.collider.GetComponent<ParameterBase>() : null;
+        skillExecutor.ExecuteSkill(skill, playerParam, playerParam);
     }
 
     void OnDrawGizmosSelected()
