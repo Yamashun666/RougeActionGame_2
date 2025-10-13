@@ -1,18 +1,26 @@
 using UnityEngine;
 using Game.SkillSystem;
-using System;
 
 /// <summary>
-/// スキルのヒット判定を担当する汎用クラス。
-/// Transform に依存せず、呼び出し側から位置情報を渡す構造。
+/// 2Dアクション用スキルヒット判定クラス。
+/// Gizmosを利用してSceneビューで攻撃範囲を可視化。
 /// </summary>
 public class SkillHitDetector
 {
-    /// <summary>
-    /// スキルのヒット判定を実行。
-    /// </summary>
-    /// <param name="instance">スキルインスタンス</param>
-    /// <param name="originTransform">発生元Transform（例：プレイヤー）</param>
+    private int enemyLayerMask = -1;
+
+    // デバッグ用キャッシュ（最後の判定位置を描画）
+    private Vector2 lastOrigin;
+    private Vector2 lastDirection;
+    private float lastRange;
+    private Vector2 lastSize;
+
+    public void InitializeLayerMask()
+    {
+        if (enemyLayerMask == -1)
+            enemyLayerMask = LayerMask.GetMask("Enemy");
+    }
+
     public void PerformHitDetection(SkillInstance instance, Transform originTransform)
     {
         if (instance == null || originTransform == null)
@@ -21,47 +29,43 @@ public class SkillHitDetector
             return;
         }
 
-        Vector3 origin = originTransform.position;
-        Vector3 direction = (instance.Target.Position - origin).normalized;
+        Vector2 origin = originTransform.position;
+        Vector2 direction = originTransform.localScale.x > 0 ? Vector2.right : Vector2.left;
         float range = 3f;
-        float radius = 0.5f;
-        Vector3 halfExtents = Vector3.one;
+        Vector2 size = new Vector2(1f, 1f);
 
-        HitShape shape = instance.Data.HitShapeType;
-        Collider[] hitColliders = null;
+        // === デバッグ用キャッシュ保存 ===
+        lastOrigin = origin;
+        lastDirection = direction;
+        lastRange = range;
+        lastSize = size;
 
-        switch (shape)
-        {
-            case HitShape.Box:
-                hitColliders = Physics.OverlapBox(origin + direction * range / 2f, halfExtents, Quaternion.identity);
-                break;
-            case HitShape.Capsule:
-                hitColliders = Physics.OverlapCapsule(origin, origin + direction * range, radius);
-                break;
-            case HitShape.Ray:
-                RaycastHit hit;
-                if (Physics.Raycast(origin, direction, out hit, range))
-                    hitColliders = new Collider[] { hit.collider };
-                else
-                    hitColliders = new Collider[0];
-                break;
-        }
+        Collider2D[] hitColliders = Physics2D.OverlapBoxAll(origin + direction * range / 2f, size, 0f, enemyLayerMask);
 
         foreach (var col in hitColliders)
         {
-            ParameterBase targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
+            if (col == null || col.CompareTag("Ground")) continue;
+
+            var targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
             if (targetParam != null)
             {
-                int beforeHP = targetParam.CurrentHP;
+                int before = targetParam.CurrentHP;
                 targetParam.TakeDamage(instance.Data.EffectAmount001);
-                Debug.Log($"[Hit] {col.name} に {instance.Data.EffectAmount001} ダメージ！ {beforeHP} → {targetParam.CurrentHP}");
+                Debug.Log($"[Hit2D] {col.name} に {instance.Data.EffectAmount001} ダメージ！ {before} → {targetParam.CurrentHP}");
             }
         }
     }
 
-    internal void PerformHitDetection(SkillInstance instance)
+    /// <summary>
+    /// Sceneビューで攻撃範囲を可視化
+    /// </summary>
+    public void DrawGizmos()
     {
-        throw new NotImplementedException();
-    }
+        if (lastRange <= 0) return;
 
+        Gizmos.color = Color.red;
+        Vector3 center = lastOrigin + lastDirection * lastRange / 2f;
+        Gizmos.DrawWireCube(center, lastSize);
+        Gizmos.DrawLine(lastOrigin, lastOrigin + lastDirection * lastRange);
+    }
 }
