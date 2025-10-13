@@ -145,9 +145,5 @@ public class SkillExecutor : MonoBehaviour
             }
         }
     }
-    private void OnDrawGizmos()
-    {
-        if (hitDetector != null)
-            hitDetector.DrawGizmos();
-    }
+
 }

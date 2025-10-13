@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded;
     private bool jumpQueued;
     private ParameterBase playerParam;
+    public SkillHitDetector hitDetector;
 
     void Awake()
     {
@@ -75,16 +76,28 @@ public class PlayerController : MonoBehaviour
 
     private void HandleAttack()
     {
+        SkillDatabase.Initialize();
         var skill = SkillDatabase.Instance.GetSkill("0001_01");
-        Debug.Log($"[Player] スキル発動！ {skill.SkillName} ({skill.LevelCode})");
-
         if (skill == null)
         {
-            Debug.LogError("SkillDatabase に 0001_01 が存在しません！");
+            Debug.LogError("[HandleAttack] Skill 0001_01 not found");
+            return;
+        }
+
+        if (skillExecutor == null)
+        {
+            Debug.LogError("[HandleAttack] SkillExecutor 未設定");
+            return;
+        }
+
+        if (playerParam == null)
+        {
+            Debug.LogError("[HandleAttack] playerParam 未設定");
             return;
         }
 
         skillExecutor.ExecuteSkill(skill, playerParam, playerParam);
+        Debug.Log("[HandleAttack] 攻撃スキル発動中");
     }
 
     void OnDrawGizmosSelected()
