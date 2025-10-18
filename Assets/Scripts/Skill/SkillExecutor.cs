@@ -7,17 +7,20 @@ using Game.SkillSystem;
 public class SkillExecutor : MonoBehaviour
 {
     private List<SkillInstance> activeSkills = new List<SkillInstance>();
-    private SkillHitDetector hitDetector;
+    [Header("SkillHitDetector")]
+    public SkillHitDetector hitDetector;
 
     [Header("エフェクト / サウンド")]
     public AudioSource audioSource;
     public Transform effectOrigin;
 
-    private void Awake()
+
+    private void Start()
     {
-        hitDetector = new SkillHitDetector();
-        hitDetector.InitializeLayerMask(); // ← LayerMask初期化をここで安全に行う
+        hitDetector = GetComponent<SkillHitDetector>();
+        Debug.Log($"[SkillExecutor] hitDetector取得確認: {(hitDetector == null ? "null" : hitDetector.name)}");
     }
+
 
     // =============================
     //  スキル発動処理
@@ -49,6 +52,11 @@ public class SkillExecutor : MonoBehaviour
 
         if (IsAttackSkill(instance.Data))
         {
+            if(hitDetector == null)
+            {
+                hitDetector = GetComponent<SkillHitDetector>();
+                Debug.Log("SkillExecutor:hitDetectorがNullです。");
+            }
             hitDetector.PerformHitDetection(instance, transform);
         }
     }
@@ -145,5 +153,4 @@ public class SkillExecutor : MonoBehaviour
             }
         }
     }
-
 }

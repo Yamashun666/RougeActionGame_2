@@ -1,118 +1,133 @@
 using UnityEngine;
-using Game.SkillSystem;
-using System;
 
-/// <summary>
-/// 【クラス名】SkillHitDetector
-/// 役割：スキルの当たり判定を行う（2D用）
-/// ※Tilemapレイヤーを無視し、実際のキャラクター座標に合わせて補正する
-/// </summary>
-public class SkillHitDetector
+public class SkillHitDetector : MonoBehaviour
 {
     private int enemyLayerMask = -1;
+    private static GameObject hitbox;
 
-    // デバッグキャッシュ（Gizmos可視化用）
-    private Vector2 lastOrigin;
-    private Vector2 lastDirection;
-    private float lastRange;
-    private Vector2 lastSize;
-    private bool hasCache = false;
+    [Header("位置・参照")]
+    public Transform ModelRoot;
+
+    private void Start()
+    {
+        // ModelRoot が未設定ならログを出して止める
+        if (ModelRoot == null)
+        {
+            Debug.LogError("ModelRootが設定されていません。Inspectorで指定してください。");
+            return;
+        }
+
+        InitializeLayerMask();
+        HitboxGenerator(ModelRoot);
+    }
+
+    public void PerformHitDetection(SkillInstance instance, Transform ModelRoot)
+    {
+        // null チェック修正（= → ==）
+        if (ModelRoot == null)
+        {
+            Debug.LogError("ModelRootがnullです。");
+            return;
+        }
+        if (hitbox == null)
+        {
+            Debug.LogError("hitboxがnullです。");
+            return;
+        }
+
+        HitboxTransformSetter(ModelRoot);
+        ExecuteAttack();
+    }
 
     /// <summary>
-    /// レイヤーマスク初期化
+    /// モデルの子として当たり判定を生成
     /// </summary>
+public void HitboxTransformSetter(Transform originTransform)
+{
+    if (originTransform == null)
+    {
+        Debug.LogWarning("[SkillHitDetector] originTransformがnullのためModelRootを使用します。");
+        originTransform = ModelRoot;
+    }
+
+    if (hitbox == null || hitbox.Equals(null))
+    {
+        Debug.LogError("[SkillHitDetector] hitboxがnullのままです。生成されていません。");
+        return;
+    }
+
+    // ここでデバッグログを追加
+    Debug.Log($"[DEBUG] HitboxTransformSetter実行開始 - hitbox={hitbox.name} active={hitbox.activeSelf}");
+
+    hitbox.transform.localPosition = Vector3.zero;
+    hitbox.transform.localRotation = Quaternion.identity;
+    hitbox.transform.localScale = new Vector3(2f, 3f, 1f);
+
+    Rigidbody2D rb = hitbox.GetComponent<Rigidbody2D>();
+    if (rb == null)
+    {
+        Debug.LogWarning("[SkillHitDetector] Rigidbody2D が見つからなかったので追加します。");
+        rb = hitbox.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+    }
+
+    BoxCollider2D col = hitbox.GetComponent<BoxCollider2D>();
+    if (col == null)
+    {
+        Debug.LogWarning("[SkillHitDetector] BoxCollider2D が見つからなかったので追加します。");
+        col = hitbox.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(2f, 3f);
+        col.isTrigger = true;
+    }
+
+    Debug.Log("[DEBUG] HitboxTransformSetter完了");
+}
+    public void HitboxGenerator(Transform originTransform)
+    {
+        hitbox = new GameObject("HitBox");
+        hitbox.transform.SetParent(ModelRoot, false);
+
+        // 生成直後に基本構成を作る
+        Rigidbody2D rb = hitbox.AddComponent<Rigidbody2D>();
+        rb.gravityScale = 0;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        BoxCollider2D col = hitbox.AddComponent<BoxCollider2D>();
+        col.size = new Vector2(2f, 3f);
+        col.isTrigger = true;
+
+        // ✅ イベント受け取りスクリプトを追加
+        hitbox.AddComponent<HitboxEventReceiver>();
+
+        Debug.Log("[HitboxGenerator] HitBoxを生成＆構成完了");
+    }
+
+    public void ExecuteAttack()
+    {
+        if (hitbox == null)
+        {
+            Debug.LogError("hitboxしばくぞ（生成されてません）");
+            return;
+        }
+
+        Debug.Log("攻撃を実行中！");
+    }
+
     public void InitializeLayerMask()
     {
         if (enemyLayerMask == -1)
             enemyLayerMask = LayerMask.GetMask("Enemy");
     }
+}
 
-    /// <summary>
-    /// スキルのヒット判定を実行
-    /// </summary>
-    /// <param name="instance">スキル情報</param>
-    /// <param name="originTransform">攻撃発生元（例：プレイヤー）</param>
-    public void PerformHitDetection(SkillInstance instance, Transform originTransform)
+/// <summary>
+/// トリガー検出用クラス（HitBoxに自動でアタッチ）
+/// </summary>
+public class HitboxEventReceiver : MonoBehaviour
+{
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (instance == null || originTransform == null)
-        {
-            Debug.LogWarning("[SkillHitDetector] Invalid call: instance or originTransform is null");
-            return;
-        }
-
-        // ======================
-        // 座標取得・補正
-        // ======================
-        Vector2 origin = originTransform.position;
-
-        // ParameterBase.ModelRoot優先
-        var param = originTransform.GetComponent<ParameterBase>();
-        if (param != null && param.ModelRoot != null)
-            origin = param.ModelRoot.position;
-
-        // Tilemap環境ではワールドスケールが1000以上になる場合があるので補正
-        if (origin.magnitude > 100f)
-        {
-            origin /= 1000000f;
-            Debug.LogWarning("[HitDetector] 座標補正適用：Tilemapスケールが大きい可能性あり。");
-        }
-
-        // 攻撃方向はlocalScale.xで決定
-        Vector2 direction = originTransform.localScale.x >= 0 ? Vector2.right : Vector2.left;
-        float range = 3f;
-        Vector2 size = new Vector2(3f, 2f);
-
-        Debug.Log($"[DEBUG] origin={origin}, direction={direction}, range={range}");
-
-        // 赤線でデバッグ可視化
-        Debug.DrawLine(origin, origin + (Vector2)(direction * range), Color.red, 1.5f);
-
-
-        // ======================
-        // 判定実行
-        // ======================
-        Collider2D[] hitColliders = Physics2D.OverlapBoxAll(
-            origin + (Vector2)(direction * range / 2f),
-            size,
-            0f,
-            enemyLayerMask
-        );
-
-        Debug.Log($"[DEBUG] OverlapBoxAll result count={hitColliders.Length}");
-
-        // デバッグキャッシュ（Gizmos用）
-        lastOrigin = origin;
-        lastDirection = direction;
-        lastRange = range;
-        lastSize = size;
-        hasCache = true;
-
-        // ======================
-        // ヒット処理
-        // ======================
-        foreach (var col in hitColliders)
-        {
-            if (col == null) continue;
-            if (col.CompareTag("Ground") || col.gameObject.layer == LayerMask.NameToLayer("Ground")) continue;
-
-            Debug.Log($"[HitDetector] 衝突: {col.name}, layer={LayerMask.LayerToName(col.gameObject.layer)}");
-
-            var targetParam = col.GetComponent<ParameterBaseHolder>()?.Parameter;
-            if (targetParam != null)
-            {
-                int before = targetParam.CurrentHP;
-                targetParam.TakeDamage(instance.Data.EffectAmount001);
-                Debug.Log($"[Damage] {col.name}: {before} → {targetParam.CurrentHP}");
-            }
-            else
-            {
-                Debug.LogWarning($"[HitDetector] {col.name} に ParameterBaseHolder が未設定です。");
-            }
-        }
+        Debug.Log($"敵「痛いンゴ！」 相手: {other.name}");
     }
-
-    /// <summary>
-    /// Sceneビューで判定範囲を可視化（Gizmos用）
-    /// </summary>
-
 }
