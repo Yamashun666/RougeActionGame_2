@@ -119,7 +119,7 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1001 &385781814
+--- !u!1001 &703814707
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -310,7 +310,7 @@ PrefabInstance:
     - target: {fileID: 2478598881391213043, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -13.52
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2478598881391213043, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
@@ -542,11 +542,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 6
       objectReference: {fileID: 0}
-    - target: {fileID: 5595498405601868703, guid: 909ba97d1692b994ebfcf271f903b6da,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5709765709601233201, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
       propertyPath: m_Layer
@@ -601,11 +596,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Layer
       value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 6805449564947133134, guid: 909ba97d1692b994ebfcf271f903b6da,
-        type: 3}
-      propertyPath: player
-      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 6921965901499709557, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
@@ -715,43 +705,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 3908439562483256480, guid: 909ba97d1692b994ebfcf271f903b6da,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 868735691}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 909ba97d1692b994ebfcf271f903b6da, type: 3}
---- !u!1 &868735681 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3908439562483256480, guid: 909ba97d1692b994ebfcf271f903b6da,
-    type: 3}
-  m_PrefabInstance: {fileID: 385781814}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &868735684 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 4937551104117216137, guid: 909ba97d1692b994ebfcf271f903b6da,
-    type: 3}
-  m_PrefabInstance: {fileID: 385781814}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 868735681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c7cb1bc045c19d45992f3ecd54296d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ParameterBase
---- !u!114 &868735691
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 868735681}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dcff06652809b3d49b25ba939aa09de7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ParameterBaseHolder
-  Parameter: {fileID: 868735684}
 --- !u!1 &890248437
 GameObject:
   m_ObjectHideFlags: 0
@@ -967,6 +922,30 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 8938645334900605144}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &3215742079582889551 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3525483727328028272, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+    type: 3}
+  m_PrefabInstance: {fileID: 8938645334900605144}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59154c54473fe304b89149f53be5aef9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIFader
+--- !u!114 &4510536794234290184 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4735485366917699720, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+    type: 3}
+  m_PrefabInstance: {fileID: 8938645334900605144}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1966496021127928055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c7cb1bc045c19d45992f3ecd54296d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ParameterBase
 --- !u!4 &7612765023085679271 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 670052520965738960, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
@@ -991,6 +970,16 @@ PrefabInstance:
       propertyPath: hitDetector
       value: 
       objectReference: {fileID: 9110141406477703708}
+    - target: {fileID: 4735485366917699720, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: MaxHP
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 4735485366917699720, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: CurrentHP
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 5386375777292805427, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}
       propertyPath: ModelRoot
@@ -1069,6 +1058,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 9110141406477703708}
+    - targetCorrespondingSourceObject: {fileID: 6797710409155868889, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 9110141406477703709}
   m_SourcePrefab: {fileID: 100100000, guid: 4be8bc6cd197b444294ae2a6bb24f81d, type: 3}
 --- !u!114 &9110141406477703708
 MonoBehaviour:
@@ -1082,12 +1075,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fec3ba250192b1f4ea0bbd509d3665d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillHitDetector
+  executor: {fileID: 0}
   ModelRoot: {fileID: 7612765023085679271}
+--- !u!114 &9110141406477703709
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1966496021127928055}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14f579b9738e93545ba7e8a8462497a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Damageable
+  HP: 100
+  parameterBase: {fileID: 4510536794234290184}
+  uIFader: {fileID: 3215742079582889551}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 385781814}
   - {fileID: 1930440074}
   - {fileID: 890248439}
+  - {fileID: 703814707}
   - {fileID: 8938645334900605144}

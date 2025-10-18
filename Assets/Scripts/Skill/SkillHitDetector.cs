@@ -1,9 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 public class SkillHitDetector : MonoBehaviour
 {
     private int enemyLayerMask = -1;
-    private static GameObject hitbox;
+    private GameObject hitbox;
 
     public SkillExecutor executor; // ★ SkillExecutor参照を保持
 
@@ -38,7 +39,6 @@ public class SkillHitDetector : MonoBehaviour
         }
 
         HitboxTransformSetter(ModelRoot);
-        ExecuteAttack();
     }
 
     /// <summary>
@@ -98,6 +98,8 @@ public void HitboxTransformSetter(Transform originTransform)
         BoxCollider2D col = hitbox.AddComponent<BoxCollider2D>();
         col.size = new Vector2(2f, 3f);
         col.isTrigger = true;
+        hitbox.SetActive(false); // ←最初は非アクティブにしておく
+
 
         // ✅ イベント受け取りスクリプトを追加
         hitbox.AddComponent<HitboxEventReceiver>();
@@ -111,15 +113,20 @@ public void HitboxTransformSetter(Transform originTransform)
         Debug.Log("[HitboxGenerator] HitBox生成完了");
     }
 
-    public void ExecuteAttack()
+    // 🔹 攻撃スキル発動時に呼ぶ関数
+    public void ActivateHitbox(float duration = 0.3f)
     {
-        if (hitbox == null)
-        {
-            Debug.LogError("hitboxしばくぞ（生成されてません）");
-            return;
-        }
+        if (hitbox == null) return;
+
+        hitbox.SetActive(true);
+        StartCoroutine(DisableAfterDelay(duration));
     }
 
+    private IEnumerator DisableAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if (hitbox != null) hitbox.SetActive(false);
+    }
     public void InitializeLayerMask()
     {
         if (enemyLayerMask == -1)
@@ -136,17 +143,16 @@ public class HitboxEventReceiver : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+
         if (other.CompareTag("Enemy"))
         {
-            Debug.Log("痛いンゴ");
+            var damage = other.GetComponent<Damageable>();
             var parameter = other.GetComponent<ParameterBase>();
-            if(executor == null)
-            {
-                Debug.LogError("[SkillHitDetector.OntriggerEnter2D]executorがNullです");
-            }
-            parameter.TakeDamage(executor.lastEffectAmount);
+            damage.TakeDamage(executor.lastEffectAmount);
             Debug.Log(parameter.CurrentHP);
+            gameObject.SetActive(false);
         }
 
     }
+    
 }

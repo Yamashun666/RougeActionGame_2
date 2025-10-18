@@ -46,10 +46,12 @@ public class SkillExecutor : MonoBehaviour
     // =============================
     private void ApplySkillEffect(SkillInstance instance)
     {
-        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target);
-        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target);
-        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target);
-        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target);
+        Damageable damageable = instance.Target.GetComponent<Damageable>();
+
+        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, damageable);
+        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, damageable);
+        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, damageable);
+        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, damageable);
 
         if (IsAttackSkill(instance.Data))
         {
@@ -59,17 +61,25 @@ public class SkillExecutor : MonoBehaviour
                 Debug.Log("SkillExecutor:hitDetectorがNullです。");
             }
             hitDetector.PerformHitDetection(instance, transform);
+            // ✅ 攻撃スキルならHitBoxを有効化！
+            HitboxActiveSetter(instance);
         }
     }
 
-    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target)
+    public void HitboxActiveSetter(SkillInstance instance)
     {
+        hitDetector.ActivateHitbox(0.2f); // ← 0.2秒間アクティブ
+        hitDetector.PerformHitDetection(instance, transform);
+    }
+    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable)
+    {
+
         switch ((SkillType)skillType)
         {
             case SkillType.Attack:
-                target.TakeDamage(skill.EffectAmount001);
+                ///damageable.TakeDamage(skill.EffectAmount001);
                 lastEffectAmount = skill.EffectAmount001;
-                Debug.Log("[ApplyEffectAmount]"+ "現在の攻撃力は" + lastEffectAmount + "です");
+                Debug.Log("[ApplyEffectAmount]" + "現在の攻撃力は" + lastEffectAmount + "です");
                 break;
             case SkillType.Move:
                 target.MoveSpeed += skill.EffectAmount001;
@@ -84,6 +94,7 @@ public class SkillExecutor : MonoBehaviour
                 break;
         }
     }
+    
 
     private bool IsAttackSkill(SkillData skill)
     {

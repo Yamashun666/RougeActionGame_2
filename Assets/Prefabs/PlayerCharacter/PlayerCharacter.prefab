@@ -26272,6 +26272,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c771d7559e514f7479d9177089474a5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillExecutor
+  lastEffectAmount: 0
   hitDetector: {fileID: 0}
   audioSource: {fileID: 0}
   effectOrigin: {fileID: 0}

@@ -47,27 +47,6 @@ public class ParameterBase : MonoBehaviour
     /// ダメージを受ける。
     /// LimitOverHP → CurrentHP の順で削られる。
     /// </summary>
-    public void TakeDamage(int damage)
-    {
-        if (damage <= 0) return;
-
-        // LimitOver優先で削る
-        if (LimitOverHP > 0)
-        {
-            int reduce = Mathf.Min(damage, LimitOverHP);
-            LimitOverHP -= reduce;
-            damage -= reduce;
-        }
-
-        if (damage > 0)
-        {
-            CurrentHP = Mathf.Max(CurrentHP - damage, 0);
-            popupSpawner?.ShowPopup(damage, false, false); // 💥 ダメージ表示！
-
-            if (CurrentHP <= 0)
-                OnDeath?.Invoke();
-        }
-}
 
     /// <summary>
     /// 回復処理。HP上限を超える場合はLimitOverHPに加算。
@@ -85,6 +64,26 @@ public class ParameterBase : MonoBehaviour
         else
         {
             CurrentHP = newHP;
+        }
+    }
+// ParameterBase.cs
+    public void TakeDamage(int damage)
+    {
+        // Damageableがいれば、そっちで処理を完結
+        var damageable = GetComponent<Damageable>();
+        if (damageable != null)
+        {
+            damageable.TakeDamage(damage);
+        }
+        else
+        {
+            // Damageableがない場合は、最低限のHP処理だけやる
+            CurrentHP = Mathf.Max(CurrentHP - damage, 0);
+            if (CurrentHP <= 0)
+            {
+                Debug.Log($"{gameObject.name} は倒れた！（Damageable未設定）");
+                Destroy(gameObject);
+            }
         }
     }
 

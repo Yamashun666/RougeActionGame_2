@@ -23,6 +23,7 @@ public class Damageable : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
+        Debug.Log("あああいたいいいいいい" + damage);
         if (parameterBase.LimitOverHP > 0)
         {
             int reduce = Mathf.Min(damage, parameterBase.LimitOverHP);
