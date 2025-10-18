@@ -5,6 +5,8 @@ public class SkillHitDetector : MonoBehaviour
     private int enemyLayerMask = -1;
     private static GameObject hitbox;
 
+    public SkillExecutor executor; // ★ SkillExecutor参照を保持
+
     [Header("位置・参照")]
     public Transform ModelRoot;
 
@@ -16,7 +18,7 @@ public class SkillHitDetector : MonoBehaviour
             Debug.LogError("ModelRootが設定されていません。Inspectorで指定してください。");
             return;
         }
-
+        executor = GetComponent<SkillExecutor>(); // ★ 同じGameObjectから取得
         InitializeLayerMask();
         HitboxGenerator(ModelRoot);
     }
@@ -101,6 +103,12 @@ public void HitboxTransformSetter(Transform originTransform)
         hitbox.AddComponent<HitboxEventReceiver>();
 
         Debug.Log("[HitboxGenerator] HitBoxを生成＆構成完了");
+
+        // ★ここでHitboxEventReceiverにexecutorを渡す！
+        var receiver = hitbox.AddComponent<HitboxEventReceiver>();
+        receiver.executor = executor;
+
+        Debug.Log("[HitboxGenerator] HitBox生成完了");
     }
 
     public void ExecuteAttack()
@@ -110,8 +118,6 @@ public void HitboxTransformSetter(Transform originTransform)
             Debug.LogError("hitboxしばくぞ（生成されてません）");
             return;
         }
-
-        Debug.Log("攻撃を実行中！");
     }
 
     public void InitializeLayerMask()
@@ -126,8 +132,21 @@ public void HitboxTransformSetter(Transform originTransform)
 /// </summary>
 public class HitboxEventReceiver : MonoBehaviour
 {
+    public SkillExecutor executor;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"敵「痛いンゴ！」 相手: {other.name}");
+        if (other.CompareTag("Enemy"))
+        {
+            Debug.Log("痛いンゴ");
+            var parameter = other.GetComponent<ParameterBase>();
+            if(executor == null)
+            {
+                Debug.LogError("[SkillHitDetector.OntriggerEnter2D]executorがNullです");
+            }
+            parameter.TakeDamage(executor.lastEffectAmount);
+            Debug.Log(parameter.CurrentHP);
+        }
+
     }
 }

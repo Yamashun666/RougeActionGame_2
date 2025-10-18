@@ -6,6 +6,7 @@ using Game.SkillSystem;
 
 public class SkillExecutor : MonoBehaviour
 {
+    public int lastEffectAmount;
     private List<SkillInstance> activeSkills = new List<SkillInstance>();
     [Header("SkillHitDetector")]
     public SkillHitDetector hitDetector;
@@ -67,6 +68,8 @@ public class SkillExecutor : MonoBehaviour
         {
             case SkillType.Attack:
                 target.TakeDamage(skill.EffectAmount001);
+                lastEffectAmount = skill.EffectAmount001;
+                Debug.Log("[ApplyEffectAmount]"+ "現在の攻撃力は" + lastEffectAmount + "です");
                 break;
             case SkillType.Move:
                 target.MoveSpeed += skill.EffectAmount001;
