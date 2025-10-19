@@ -56,7 +56,20 @@ public class PlayerController : MonoBehaviour
         {
             Vector2 moveForce = new Vector2(moveInput.x * moveSpeed, 0f);
             rb.AddForce(moveForce, ForceMode2D.Force);
-            //Debug.Log(moveInput.x > 0 ? "RightMoving" : "LeftMoving");
+            if (Mathf.Abs(rb.linearVelocity.x) > moveSpeed)
+            {
+                rb.linearVelocity = new Vector2(Mathf.Sign(rb.linearVelocity.x) * moveSpeed, rb.linearVelocity.y);
+            }
+            if (moveInput.x == 0)
+            {
+    // 減速率
+                float decelFactor = 0.85f;
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x * decelFactor, rb.linearVelocity.y);
+
+                // 速度がかなり小さければ完全停止
+                if (Mathf.Abs(rb.linearVelocity.x) < 0.1f)
+                rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+            }
         }
     }
 
