@@ -6,6 +6,7 @@ public class Damageable : MonoBehaviour
     public int HP = 100;
     public ParameterBase parameterBase;
     public UIFader uIFader;
+    public SceneChange sceneChange;
     public void ApplyDamage(int damage)
     {
         HP -= damage;
@@ -19,6 +20,17 @@ public class Damageable : MonoBehaviour
     private void Die()
     {
         Debug.Log($"{gameObject.name} は倒れた！");
+
+        // === ★ここが重要：Playerだけロビーに戻る === //
+        if (CompareTag("Player")) // タグ判定（最も簡単で安全）
+        {
+            Debug.Log("💀 Player死亡 → ロビーへ遷移します。");
+            sceneChange?.ChangeScene(); // InspectorでSceneChangeを紐づけておく
+            return; // Destroyしない（遷移でシーン全体破棄される）
+        }
+
+        // 敵などの一般的な死亡処理
+        GetComponent<DeathEffectHandler>()?.TriggerDeath();
         Destroy(gameObject);
     }
     public void TakeDamage(int damage)
