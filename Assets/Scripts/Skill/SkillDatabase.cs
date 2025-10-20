@@ -29,6 +29,28 @@ public class SkillDatabase : ScriptableObject
             Debug.LogError("[SkillDatabase] SkillDatabase.asset が Resources に存在しません！");
         }
     }
+    public SkillData GetRandomSkillByRarity(int rarity, bool excludeUnique = true)
+    {
+        List<SkillData> candidates = new List<SkillData>();
+
+        foreach (var skill in skills)
+        {
+            if (skill == null) continue;
+            if (skill.Rarity != rarity) continue;
+            if (excludeUnique && skill.IsUnique) continue;
+
+            candidates.Add(skill);
+        }
+
+        if (candidates.Count == 0)
+        {
+            Debug.LogWarning($"[SkillDatabase] 該当レアリティ({rarity})のスキルが見つかりません。");
+            return null;
+        }
+
+        int index = Random.Range(0, candidates.Count);
+        return candidates[index];
+    }
 
     /// <summary>
     /// LevelCodeでスキルを検索

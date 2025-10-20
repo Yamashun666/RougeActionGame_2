@@ -39,5 +39,8 @@ public class SkillData : ScriptableObject
     public string SkillIcon;            // このスキルのビジュアルアイコン。これのファイル名を検索し、UI上に表記。
     public string LevelUPSkillCode;     // レベルアップ時に渡すスキルのコード。Nullならレベルアップできる関数を呼ぶときにエラーを吐くようにしろ
     public HitShape HitShapeType; // 攻撃判定の形状
+    
+    [Header("特殊設定")]
+    public bool IsUnique = false;
 
 }

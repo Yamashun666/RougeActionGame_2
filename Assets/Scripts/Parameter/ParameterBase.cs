@@ -36,6 +36,7 @@ public class ParameterBase : MonoBehaviour
     public Vector3 Position => ModelRoot ? ModelRoot.position : transform.position;
     public event Action OnDeath;
     public DamagePopupSpawner popupSpawner;
+    public  EnemyMaster enemyMaster ;
 
 
 
@@ -51,6 +52,31 @@ public class ParameterBase : MonoBehaviour
     /// <summary>
     /// 回復処理。HP上限を超える場合はLimitOverHPに加算。
     /// </summary>
+        private void Awake()
+    {
+        if (enemyMaster != null)
+        {
+            ApplyEnemyMasters(enemyMaster);
+        }
+    }
+
+    public void ApplyEnemyMasters(EnemyMaster  master)
+    {
+        Name = master.Name;
+        MaxHP = master.MaxHP;
+        CurrentHP = master.MaxHP;
+        LimitOverHP = master.LimitOverHP;
+        Attack = master.Attack;
+        MagicPower = master.MagicPower;
+        Defense = master.Defense;
+        DOTDamageRate = master.DOTDamageRate;
+        AttackSpeed = master.AttackSpeed;
+        CTReduction = master.CTReduction;
+        MoveSpeed = master.MoveSpeed;
+        CriticalRate = master.CriticalRate;
+
+        Debug.Log($"[ParameterBase.ApplyEnemyMasters] {Name} のパラメータを EnemyMaster から初期化しました。");
+    }
     public void Heal(int amount)
     {
         if (amount <= 0) return;
