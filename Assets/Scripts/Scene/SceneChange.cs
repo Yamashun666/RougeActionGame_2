@@ -1,42 +1,45 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-
-
-
 public class SceneChange : MonoBehaviour
 {
+    [SerializeField] private string changeSceneName;
     private Button button;
     private bool isClicked = false;
-    [SerializeField] public string changeSceneName;
+
     void Start()
     {
-
         button = GetComponent<Button>();
+
+        if (button == null)
+        {
+            Debug.LogError("[SceneChange] Button コンポーネントが見つかりません。");
+            return;
+        }
+
+        // ✅ クリックイベントを登録
+        button.onClick.AddListener(OnButtonClicked);
     }
-    void Update()
+
+    private void OnButtonClicked()
     {
         if (isClicked)
         {
-            Debug.Log("[SceneChange.OnButtonClicked] すでにシーン遷移ボタンが押されています。");
-            return; // 二重押し防止
+            Debug.Log("[SceneChange] 二重クリックを防止しました。");
+            return;
         }
 
         isClicked = true;
 
-        if (!string.IsNullOrEmpty(changeSceneName))
-        {
-            SceneManager.LoadScene(changeSceneName);
-        }
-        else
+        if (string.IsNullOrEmpty(changeSceneName))
         {
             Debug.LogError("[SceneChange] 遷移先シーン名が設定されていません。");
-            isClicked = false; // エラー時は戻す
+            isClicked = false;
+            return;
         }
 
+        Debug.Log($"[SceneChange] シーン '{changeSceneName}' に遷移します。");
+        SceneManager.LoadScene(changeSceneName);
     }
-
 }
