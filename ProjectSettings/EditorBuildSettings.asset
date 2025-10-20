@@ -9,7 +9,7 @@ EditorBuildSettings:
     path: Assets/Scenes/MockUPScene.unity
     guid: fe9118fffcb968243bde3816b9337a72
   - enabled: 1
-    path: Assets/Scenes/RobbyScene.unity
+    path: Assets/Scenes/LobbyScene.unity
     guid: 710c93ecb3a6fd54ea2eb2d74df75f26
   - enabled: 1
     path: Assets/ThirdParty/CorgiEngine/Demos/StartScreen/SplashScreen.unity

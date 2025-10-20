@@ -14702,6 +14702,7 @@ MonoBehaviour:
   HP: 100
   parameterBase: {fileID: 4937551104117216137}
   uIFader: {fileID: 5774361453510996360}
+  sceneChange: {fileID: 0}
 --- !u!114 &6805449564947133134
 MonoBehaviour:
   m_ObjectHideFlags: 0
