@@ -14687,6 +14687,7 @@ MonoBehaviour:
   CriticalRate: 0
   ModelRoot: {fileID: 5595498405601868703}
   popupSpawner: {fileID: 0}
+  enemyMaster: {fileID: 0}
 --- !u!114 &7030502334345632536
 MonoBehaviour:
   m_ObjectHideFlags: 0
