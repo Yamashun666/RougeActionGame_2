@@ -9,22 +9,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0ea6b91433c2f8d40b1da3901c9e8e33, type: 3}
-  m_Name: BasicAttackSkill
+  m_Script: {fileID: 0}
+  m_Name: GlideAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  SkillName: BasicAttackSkill
-  GroupCode: 0001
-  LevelCode: 0001_01
-  Rarity: 1
+  SkillName: GlideAttack
+  GroupCode: 0002
+  LevelCode: 0002_01
+  Rarity: 2
   SkillType001: 1
   SkillType002: 0
   SkillType003: 0
   SkillType004: 0
   Type: 1
-  EffectAmount001: 100
+  EffectAmount001: 80
   EffectAmount002: 0
   EffectAmount003: 0
-  CoolTime: 0
+  CoolTime: 5
   LevelUP_LevelCode: 0
   UseSkillSFX001: 
   DelayUseSkillSFX001: 0
@@ -38,3 +38,4 @@ MonoBehaviour:
   SkillIcon: 
   LevelUPSkillCode: 
   HitShapeType: 0
+  IsUnique: 0

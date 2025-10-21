@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Game.SkillSystem;
 
@@ -9,38 +10,107 @@ public enum SkillType
     Heal = 3,
     Buff = 4
 }
-[CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
 
+[CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
 public class SkillData : ScriptableObject
 {
     public string SkillName;            // スキルの名称
     public string GroupCode;            // レベルすべてを包括したスキルのCODE
     public string LevelCode;            // GroupCodeをスキルレベルごとに分割したCODE
     public int Rarity;                  // このスキルのレアリティ。1=コモン 2=アンコモン 3 = レア 4 = エピック 5 = レジェンダリー
-    public int SkillType001;            // どの効果を反映させるか。SkillTypeに定義。動きを重複させることも可能。
-    public int SkillType002;            // どの効果を反映させるか。SkillTypeに定義。動きを重複させることも可能。
-    public int SkillType003;            // どの効果を反映させるか。SkillTypeに定義。動きを重複させることも可能。
-    public int SkillType004;            // どの効果を反映させるか。SkillTypeに定義。動きを重複させることも可能。
-    public SkillType Type;              // ここにSkillTypeを代入（不要か？）
-    public int EffectAmount001;         // どれだけの効果量を持つか？攻撃力に反映させるなら150でダメージ1.5倍など。どのパラメーターを作用させるかはSkillTypeの中で定義。
-    public int EffectAmount002;         // どれだけの効果量を持つか？攻撃力に反映させるなら150でダメージ1.5倍など。どのパラメーターを作用させるかはSkillTypeの中で定義。
-    public int EffectAmount003;         // どれだけの効果量を持つか？攻撃力に反映させるなら150でダメージ1.5倍など。どのパラメーターを作用させるかはSkillTypeの中で定義。
-    public int CoolTime;                // スキルのCT短縮量。1000分立で表記。
-    public int LevelUP_LevelCode;       // スキルレベルアップ時に渡すLevelCODE
-    public string UseSkillSFX001;       // スキル使用時に再生するSFX。
-    public float DelayUseSkillSFX001;   // UseSkillSFX001の再生遅延量。
-    public string UseSkillSFX002;       // スキル使用時に再生するSFX。
-    public float DelayUseSkillSFX002;   // UseSkillSFX002の再生遅延量。
-    public string UseSkillVFX001;       // スキル使用時に再生するVFX。
-    public float DelayUseSkillVFX001;   // UseSkillVFX001の再生遅延量。
-    public string UseSkillVFX002;       // スキル使用時に再生するVFX。
-    public float DelayUseSkillVFX002;   // UseSkillVFX002の再生遅延量。
-    public string SkillEnhancementTable;// このスキルに渡すスキル成長テーブルの定義。Codeと同じ値を必ず渡すこと
-    public string SkillIcon;            // このスキルのビジュアルアイコン。これのファイル名を検索し、UI上に表記。
-    public string LevelUPSkillCode;     // レベルアップ時に渡すスキルのコード。Nullならレベルアップできる関数を呼ぶときにエラーを吐くようにしろ
-    public HitShape HitShapeType; // 攻撃判定の形状
-    
+    public int SkillType001;
+    public int SkillType002;
+    public int SkillType003;
+    public int SkillType004;
+    public SkillType Type;
+    public int EffectAmount001;
+    public int EffectAmount002;
+    public int EffectAmount003;
+    public int CoolTime;
+    public int LevelUP_LevelCode;
+    public string UseSkillSFX001;
+    public float DelayUseSkillSFX001;
+    public string UseSkillSFX002;
+    public float DelayUseSkillSFX002;
+    public string UseSkillVFX001;
+    public float DelayUseSkillVFX001;
+    public string UseSkillVFX002;
+    public float DelayUseSkillVFX002;
+    public string SkillEnhancementTable;
+    public string SkillIcon;
+    public string LevelUPSkillCode;
+    public HitShape HitShapeType;
+
     [Header("特殊設定")]
     public bool IsUnique = false;
+}
 
+//////////////////////////////////////////////////////////
+/// ここから SkillManager の定義 //////////////////////////
+//////////////////////////////////////////////////////////
+
+public class SkillManager : MonoBehaviour
+{
+    [Header("プレイヤーが保持しているスキル一覧")]
+    public List<SkillData> ownedSkills = new List<SkillData>();
+
+    /// <summary>
+    /// スキルを追加する。
+    /// 既に同じGroupCodeを持つスキルがある場合はレベルアップ判定。
+    /// </summary>
+    public void AddSkill(SkillData newSkill)
+    {
+        if (newSkill == null)
+        {
+            Debug.LogWarning("[SkillManager] nullスキルをAddSkillに渡しました。");
+            return;
+        }
+
+        // 重複チェック
+        SkillData existing = ownedSkills.Find(s => s.GroupCode == newSkill.GroupCode);
+        if (existing != null)
+        {
+            HandleLevelUp(existing);
+            return;
+        }
+
+        // 新規追加
+        ownedSkills.Add(newSkill);
+        Debug.Log($"🆕 スキル [{newSkill.SkillName}] を新たに習得！");
+    }
+
+    /// <summary>
+    /// スキルのレベルアップ処理。
+    /// </summary>
+    private void HandleLevelUp(SkillData existing)
+    {
+        if (string.IsNullOrEmpty(existing.LevelUPSkillCode))
+        {
+            Debug.Log($"🔸 [{existing.SkillName}] は最大レベルです。");
+            return;
+        }
+
+        SkillData nextLevel = SkillDatabase.Instance.GetSkill(existing.LevelUPSkillCode);
+        if (nextLevel == null)
+        {
+            Debug.LogWarning($"[SkillManager] LevelUPSkillCode='{existing.LevelUPSkillCode}' が見つかりません。");
+            return;
+        }
+
+        ownedSkills.Remove(existing);
+        ownedSkills.Add(nextLevel);
+        Debug.Log($"⚡ スキル [{existing.SkillName}] → [{nextLevel.SkillName}] にレベルアップ！");
+    }
+
+    /// <summary>
+    /// 指定スキルを削除（将来用）
+    /// </summary>
+    public void RemoveSkill(SkillData skill)
+    {
+        if (ownedSkills.Contains(skill))
+        {
+            ownedSkills.Remove(skill);
+            Debug.Log($"❌ スキル [{skill.SkillName}] を削除しました。");
+        }
+    }
 }

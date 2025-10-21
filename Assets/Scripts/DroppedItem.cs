@@ -12,6 +12,7 @@ public class DroppedItem : MonoBehaviour
     public Color rareColor = Color.cyan;
     public Color epicColor = Color.magenta;
     public Color legendaryColor = Color.yellow;
+    public SkillData skillData;
 
     [Header("内部データ")]
     public string skillLevelCode; // SkillDatabase内のLevelCode
@@ -29,19 +30,13 @@ public class DroppedItem : MonoBehaviour
     /// </summary>
     public void AssignSkill(string levelCode)
     {
-        // SkillDatabaseを参照してスキルを取得
-        SkillData data = SkillDatabase.Instance.GetSkill(levelCode);
-        if (data == null)
-        {
-            Debug.LogError($"[DroppedItem.AssignSkill] LevelCode={levelCode} のスキルが見つかりません。");
-            return;
-        }
-
-        assignedSkill = data;
-        skillLevelCode = levelCode;
-
-        // アイコン・色を反映
-        ApplyVisuals();
+        assignedSkill = SkillDatabase.Instance.GetSkill(levelCode);
+        if (assignedSkill != null)
+            Debug.Log($"💎 DroppedItem にスキル [{assignedSkill.SkillName}] を割り当てました！");
+    }
+    public SkillData GetAssignedSkill()
+    {
+        return assignedSkill;
     }
 
     /// <summary>
@@ -75,11 +70,4 @@ public class DroppedItem : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// プレイヤーが拾ったときの処理（今後拡張用）
-    /// </summary>
-    public SkillData GetAssignedSkill()
-    {
-        return assignedSkill;
-    }
 }
