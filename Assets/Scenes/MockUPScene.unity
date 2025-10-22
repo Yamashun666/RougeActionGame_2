@@ -2265,7 +2265,7 @@ MonoBehaviour:
   rareColor: {r: 0, g: 1, b: 1, a: 1}
   epicColor: {r: 1, g: 0, b: 1, a: 1}
   legendaryColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  skillData: {fileID: 0}
+  skillData: {fileID: 11400000, guid: 0843d22b661e1134ea62bfd3727ef8fa, type: 2}
   skillLevelCode: 0002_01
 --- !u!58 &2119831652
 CircleCollider2D:
@@ -2663,6 +2663,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
   coinCount: 0
+  skillData: {fileID: 0}
 --- !u!114 &9110141406477703711
 MonoBehaviour:
   m_ObjectHideFlags: 0
