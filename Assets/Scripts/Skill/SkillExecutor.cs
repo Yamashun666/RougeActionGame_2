@@ -14,12 +14,14 @@ public class SkillExecutor : MonoBehaviour
     [Header("エフェクト / サウンド")]
     public AudioSource audioSource;
     public Transform effectOrigin;
+    public PlayerController playerController;
 
 
     private void Start()
     {
         hitDetector = GetComponent<SkillHitDetector>();
         Debug.Log($"[SkillExecutor] hitDetector取得確認: {(hitDetector == null ? "null" : hitDetector.name)}");
+        playerController = GetComponent<PlayerController>();
     }
 
 
@@ -39,6 +41,14 @@ public class SkillExecutor : MonoBehaviour
 
         StartCoroutine(PlaySkillEffects(instance));
         ApplySkillEffect(instance);
+    }
+    public void ExecuteDoubleJump(SkillData skill, ParameterBase caster)
+    {
+        var player = FindObjectOfType<PlayerController>();
+        if (player == null) return;
+
+        player.EnableTemporaryDoubleJump();
+        Debug.Log("[SkillExecutor] 二段ジャンプスキルを発動！");
     }
 
     // =============================
@@ -92,9 +102,12 @@ public class SkillExecutor : MonoBehaviour
                 target.Defense += skill.EffectAmount002;
                 target.MoveSpeed += skill.EffectAmount003;
                 break;
+            case SkillType.DoubleJump:
+                ExecuteDoubleJump();
+                break;
         }
     }
-    
+
 
     private bool IsAttackSkill(SkillData skill)
     {
@@ -102,6 +115,11 @@ public class SkillExecutor : MonoBehaviour
                skill.SkillType002 == (int)SkillType.Attack ||
                skill.SkillType003 == (int)SkillType.Attack ||
                skill.SkillType004 == (int)SkillType.Attack;
+    }
+
+    private void ExecuteDoubleJump()
+    {
+        
     }
 
     // =============================

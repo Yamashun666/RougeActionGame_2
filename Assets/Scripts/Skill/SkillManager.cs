@@ -8,7 +8,8 @@ public enum SkillType
     Attack = 1,
     Move = 2,
     Heal = 3,
-    Buff = 4
+    Buff = 4,
+    DoubleJump = 5,
 }
 
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
@@ -113,4 +114,5 @@ public class SkillManager : MonoBehaviour
             Debug.Log($"❌ スキル [{skill.SkillName}] を削除しました。");
         }
     }
+
 }

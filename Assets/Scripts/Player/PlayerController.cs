@@ -17,10 +17,12 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private PlayerInputActions inputActions;
     private Vector2 moveInput;
-    private bool isGrounded;
+    public bool isGrounded;
     private bool jumpQueued;
     private ParameterBase playerParam;
     public SkillHitDetector hitDetector;
+    private bool canDoubleJump = false;  // 今「一度だけ」二段ジャンプができる状態か
+    private bool hasUsedDoubleJump = false; // 既に使ったかどうか
 
     void Awake()
     {
@@ -47,6 +49,11 @@ public class PlayerController : MonoBehaviour
         //UnityEngine.Debug.Log(isGrounded);
         HandleMovement();
         HandleJump();
+        /// DoubleJumpが完全には出来ておらず、Input周りとの調整・修正が必要なので一旦コメントアウト
+        ///if (Input.GetButtonDown("Jump") && canDoubleJump && !hasUsedDoubleJump && !isGrounded)
+        {
+            DoubleJump();
+        }
     }
 
     void HandleMovement()
@@ -62,15 +69,26 @@ public class PlayerController : MonoBehaviour
             }
             if (moveInput.x == 0)
             {
-    // 減速率
+                // 減速率
                 float decelFactor = 0.85f;
                 rb.linearVelocity = new Vector2(rb.linearVelocity.x * decelFactor, rb.linearVelocity.y);
 
                 // 速度がかなり小さければ完全停止
                 if (Mathf.Abs(rb.linearVelocity.x) < 0.1f)
-                rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
+                    rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
             }
         }
+    }
+    public void DoubleJump()
+    {
+        hasUsedDoubleJump = true;
+        canDoubleJump = false; // 一度使ったら消える
+        Debug.Log("🟢 スキルによる二段ジャンプ発動！");
+    }
+    public void EnableTemporaryDoubleJump()
+    {
+        canDoubleJump = true;
+        hasUsedDoubleJump = false; // 念のためリセット
     }
 
     void HandleJump()
