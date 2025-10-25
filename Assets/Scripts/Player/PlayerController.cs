@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour
         /// DoubleJumpが完全には出来ておらず、Input周りとの調整・修正が必要なので一旦コメントアウト
         ///if (Input.GetButtonDown("Jump") && canDoubleJump && !hasUsedDoubleJump && !isGrounded)
         {
-            DoubleJump();
+            ///DoubleJump();
         }
     }
 

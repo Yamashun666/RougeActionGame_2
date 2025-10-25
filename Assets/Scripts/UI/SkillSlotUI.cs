@@ -2,61 +2,196 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class SkillSlotUI : MonoBehaviour, IDropHandler
+public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    public int slotIndex;
+    [Header("UI構成")]
     public Image iconImage;
+    public Image highlightFrame;
+    public int slotIndex;
     public SkillData assignedSkill;
+    public DroppedItem assignedDroppedItem;
 
-    public void SetSkill(SkillData skill)
+    private Canvas canvas; // 親Canvasを取得してUI座標を変換するため
+    private RectTransform rectTransform;
+    private CanvasGroup canvasGroup;
+    private SkillOrbDragController skillOrbDragController;
+
+    private Vector2 originalPosition;
+    private bool isDragging = false;
+
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        canvas = GetComponentInParent<Canvas>();
+    }
+
+    // =======================================
+    // 💠 スキル登録・削除
+    // =======================================
+    public void SetSkill(SkillData skill, DroppedItem dropItem, Sprite overrideIcon)
     {
         assignedSkill = skill;
+        assignedDroppedItem = dropItem;
 
-        if (skill != null)
+        if (iconImage == null)
         {
-            // 🔹 string → Sprite に変換して読み込み
-            Sprite loadedSprite = Resources.Load<Sprite>($"Icons/{skill.SkillIcon}");
+            Debug.LogWarning($"[SkillSlotUI] スロット {slotIndex} にIconが見つかりません。");
+            return;
+        }
 
-            if (loadedSprite != null)
-            {
-                iconImage.sprite = loadedSprite;
-                iconImage.enabled = true;
-            }
-            else
-            {
-                Debug.LogWarning($"[SkillSlotUI] スプライトが見つかりません: {skill.SkillIcon}");
-                iconImage.enabled = false;
-            }
+        // 優先順：overrideIcon > dropItem.defaultIcon > SkillData.SkillIcon
+        Sprite iconToUse = overrideIcon ?? dropItem?.defaultIcon;
+
+        if (iconToUse == null && !string.IsNullOrEmpty(skill?.SkillIcon))
+        {
+            // SkillData.SkillIcon に "SkillIcons/DoubleJump" のようなパスが入っている想定
+            iconToUse = Resources.Load<Sprite>($"SkillIcons/{skill.SkillIcon}");
+        }
+
+        if (iconToUse != null)
+        {
+            iconImage.sprite = iconToUse;
+            iconImage.color = Color.white;
+            Debug.Log($"[SkillSlotUI] スロット {slotIndex} に {skill?.SkillName ?? "null"} のアイコンを設定しました。");
         }
         else
         {
-            iconImage.sprite = null;
-            iconImage.enabled = false;
+            Debug.LogWarning($"[SkillSlotUI] スロット {slotIndex} に表示可能なアイコンがありません。");
         }
     }
 
-    public void ClearSkill()
+    public void ClearSlot()
     {
         assignedSkill = null;
-        iconImage.sprite = null;
-        iconImage.enabled = false;
+        assignedDroppedItem = null;
+
+        if (iconImage != null)
+        {
+            iconImage.sprite = null;
+            iconImage.color = new Color(1, 1, 1, 0);
+        }
     }
 
+    // alias互換用
+    public void ClearSkill() => ClearSlot();
+
+    // =======================================
+    // 🎯 ドロップ時（他のオブジェクトやスキルOrbから）
+    // =======================================
     public void OnDrop(PointerEventData eventData)
     {
-        var draggedOrb = eventData.pointerDrag?.GetComponent<SkillOrbUI>();
-        if (draggedOrb == null) return;
+        if (!SkillOrbDragController.Instance.IsDragging) return;
 
-        SkillData droppedSkill = draggedOrb.GetSkillData();
-        SkillSlotUI fromSlot = draggedOrb.GetOriginSlot();
+        SkillData draggedSkill = SkillOrbDragController.Instance.GetDraggedSkill();
+        DroppedItem originDrop = SkillOrbDragController.Instance.GetOriginDrop();
 
-        if (fromSlot == this) return;
-
-        // 🔁 スロット入れ替え処理
-        SkillData temp = assignedSkill;
-        SetSkill(droppedSkill);
-        if (fromSlot != null) fromSlot.SetSkill(temp);
-
-        Debug.Log($"[SkillSlotUI] {slotIndex} ←→ {fromSlot?.slotIndex} 入れ替え完了");
+        if (draggedSkill != null)
+        {
+            SetSkill(draggedSkill, originDrop, skillOrbDragController.cachedIcon);
+            SkillOrbDragController.Instance.EndDrag();
+            HighlightSlot();
+            Debug.Log($"[SkillSlotUI] Slot {slotIndex} に {draggedSkill.SkillName} を登録しました。");
+        }
     }
+
+    // =======================================
+    // 💡 ドラッグ＆ドロップ（スロット間の移動）
+    // =======================================
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (assignedSkill == null) return;
+
+        isDragging = true;
+        originalPosition = rectTransform.anchoredPosition;
+        canvasGroup.alpha = 0.6f;
+        canvasGroup.blocksRaycasts = false;
+
+        SkillOrbDragController.Instance.BeginDragFromSlot(this);
+        Debug.Log($"[SkillSlotUI] Slot {slotIndex} からドラッグ開始");
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (!isDragging || canvas == null) return;
+
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            canvas.transform as RectTransform,
+            eventData.position,
+            canvas.worldCamera,
+            out Vector2 pos
+        );
+        rectTransform.anchoredPosition = pos;
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        isDragging = false;
+        rectTransform.anchoredPosition = originalPosition;
+        canvasGroup.alpha = 1f;
+        canvasGroup.blocksRaycasts = true;
+
+        // 地面にドロップされた場合
+        if (!eventData.pointerCurrentRaycast.gameObject)
+        {
+            DropSkillToField();
+        }
+
+        SkillOrbDragController.Instance.EndDrag();
+    }
+
+    // =======================================
+    // ✨ 地面へのドロップ処理
+    // =======================================
+    private void DropSkillToField()
+    {
+        if (assignedSkill == null) return;
+
+        // Prefabロード
+        var orbPrefab = Resources.Load<GameObject>("Prefabs/SkillOrb");
+        if (orbPrefab == null)
+        {
+            Debug.LogError("[SkillSlotUI] SkillOrb prefab が Resources/Prefabs に存在しません。");
+            return;
+        }
+
+        // プレイヤー付近に出現
+        var player = GameObject.FindGameObjectWithTag("Player");
+        Vector3 dropPos = player ? player.transform.position + Vector3.right * 1.5f : Vector3.zero;
+        var orb = Object.Instantiate(orbPrefab, dropPos, Quaternion.identity);
+
+        var dropItem = orb.GetComponent<DroppedItem>();
+        if (dropItem != null)
+        {
+            dropItem.AssignSkill(assignedSkill);
+        }
+
+        Debug.Log($"[SkillSlotUI] スキル [{assignedSkill.SkillName}] を地面にドロップしました。");
+        ClearSlot();
+    }
+
+    // =======================================
+    // 🌟 視覚演出
+    // =======================================
+    private void HighlightSlot()
+    {
+        if (highlightFrame != null)
+        {
+            highlightFrame.gameObject.SetActive(true);
+            CancelInvoke(nameof(ClearHighlight));
+            Invoke(nameof(ClearHighlight), 0.5f);
+        }
+    }
+
+    private void ClearHighlight()
+    {
+        if (highlightFrame != null)
+            highlightFrame.gameObject.SetActive(false);
+    }
+
+    internal void SetSkill(SkillData dummy, DroppedItem dummy2, SkillOrbDragController dummy3)
+    {
+        throw new System.NotImplementedException();
+    }
+
 }

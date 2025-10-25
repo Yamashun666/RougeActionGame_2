@@ -106,7 +106,7 @@ public class EnemyDropHandler : MonoBehaviour
         var dropItem = orb.GetComponent<DroppedItem>();
         if (dropItem != null)
         {
-            dropItem.AssignSkill(skill.LevelCode);
+            dropItem.AssignSkill(skill);
         }
 
         Debug.Log($"✨ {master.Name} がスキル [{skill.SkillName}] (Rarity={rolledRarity}) をドロップ！ roll={roll}");

@@ -1,23 +1,15 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class SkillUIManager : MonoBehaviour
 {
     public static SkillUIManager Instance { get; private set; }
+    public SkillOrbDragController skillOrbDragController;
 
-    [Header("UI生成設定")]
-    [Tooltip("SkillOrbUIプレハブのResources内パス。例: Resources/UI/SkillOrbUI.prefab")]
-    [SerializeField] private string prefabPath = "UI/SkillOrbUI";
-
-    [Tooltip("SkillOrbUIを配置する親（Canvas配下推奨）")]
-    [SerializeField] private Transform skillListParent;
-
-    private GameObject skillOrbPrefab;
-    private readonly List<SkillOrbUI> activeSkillUIList = new();
+    [Header("UIスロット（Q=0, W=1, E=2, R=3 の想定）")]
+    public SkillSlotUI[] slots;
 
     private void Awake()
     {
-        // シングルトン処理
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -25,86 +17,54 @@ public class SkillUIManager : MonoBehaviour
         }
         Instance = this;
 
-        LoadPrefab();
-
-        // Canvas自動検出（未指定なら）
-        if (skillListParent == null)
+        if (slots == null || slots.Length == 0)
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
-            if (canvas != null)
-            {
-                skillListParent = canvas.transform;
-                Debug.Log("[SkillUIManager] Canvasが自動検出されました。");
-            }
-            else
-            {
-                Debug.LogError("[SkillUIManager] Canvasが見つかりません。UI生成に失敗します。");
-            }
+            Debug.LogWarning("[SkillUIManager] slots が設定されていません。Inspectorで4つの SkillSlotUI を割り当ててください。");
         }
     }
 
     /// <summary>
-    /// ResourcesからPrefabをロード
+    /// 最初に空いているスロットへ登録
     /// </summary>
-    private void LoadPrefab()
+    public void RegisterSkillToNextSlot(SkillData skill, DroppedItem dropItem)
     {
-        skillOrbPrefab = Resources.Load<GameObject>(prefabPath);
-        if (skillOrbPrefab == null)
+        if (skill == null)
         {
-            Debug.LogError($"[SkillUIManager] {prefabPath}.prefab が Resources フォルダ内に存在しません！");
-        }
-        else
-        {
-            Debug.Log($"[SkillUIManager] SkillOrbUI プレハブをロード成功：{prefabPath}");
-        }
-    }
-
-    /// <summary>
-    /// 新しいスキルUIアイコンを生成
-    /// </summary>
-    public void CreateSkillOrbUI(SkillData skillData)
-    {
-        if (skillData == null)
-        {
-            Debug.LogError("[SkillUIManager] SkillDataがnullです。");
+            Debug.LogError("[SkillUIManager] skill が null です。");
             return;
         }
 
-        if (skillOrbPrefab == null)
+        if (slots == null || slots.Length == 0)
         {
-            LoadPrefab();
-            if (skillOrbPrefab == null) return;
+            Debug.LogError("[SkillUIManager] slots が未設定です。");
+            return;
         }
 
-        Transform parent = skillListParent != null ? skillListParent : transform;
-        GameObject uiObj = Instantiate(skillOrbPrefab, parent);
-
-        uiObj.transform.localScale = Vector3.one; // スケール崩壊対策
-        uiObj.transform.localPosition = Vector3.zero;
-
-        var orbUI = uiObj.GetComponent<SkillOrbUI>();
-        if (orbUI != null)
+        foreach (var slot in slots)
         {
-            orbUI.SetSkill(skillData);
-            activeSkillUIList.Add(orbUI);
-            Debug.Log($"[SkillUIManager] スキルUI生成完了：{skillData.SkillName}");
+            if (slot == null) continue;
+
+            if (slot.assignedSkill == null)
+            {
+                slot.SetSkill(skill, dropItem, skillOrbDragController.cachedIcon);
+                Debug.Log($"[SkillUIManager] {skill.SkillName} をスロット {slot.slotIndex} に登録しました。");
+                return;
+            }
         }
-        else
-        {
-            Debug.LogError("[SkillUIManager] SkillOrbUIがプレハブに存在しません。");
-        }
+
+        Debug.LogWarning("[SkillUIManager] 空きスロットがありません。");
     }
 
     /// <summary>
-    /// すべてのスキルUIをクリア
+    /// スロット番号を指定して登録（必要なら使用）
     /// </summary>
-    public void ClearAllSkillUI()
+    public void RegisterSkillToSlot(int index, SkillData skill, DroppedItem dropItem)
     {
-        foreach (var ui in activeSkillUIList)
+        if (slots == null || index < 0 || index >= slots.Length)
         {
-            if (ui != null) Destroy(ui.gameObject);
+            Debug.LogError($"[SkillUIManager] 不正なスロット index={index}");
+            return;
         }
-        activeSkillUIList.Clear();
-        Debug.Log("[SkillUIManager] スキルUIを全削除しました。");
+        slots[index].SetSkill(skill, dropItem, skillOrbDragController.cachedIcon);
     }
 }

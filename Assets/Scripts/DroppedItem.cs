@@ -7,36 +7,49 @@ public class DroppedItem : MonoBehaviour
 {
     [Header("ビジュアル関連")]
     public SpriteRenderer iconRenderer;
-    public Sprite defaultIcon;
     public Color commonColor = Color.white;
     public Color rareColor = Color.cyan;
     public Color epicColor = Color.magenta;
     public Color legendaryColor = Color.yellow;
     public SkillData skillData;
+    public Sprite defaultIcon;
+
+    public SkillData GetAssignedSkill() => skillData;
 
     [Header("内部データ")]
     public string skillLevelCode; // SkillDatabase内のLevelCode
-    private SkillData assignedSkill;
 
+
+
+    private void Awake()
+    {
+        // テスト用: 未設定ならResourcesから仮読み
+        if (skillData == null)
+        {
+            skillData = Resources.Load<SkillData>("SkillDatabase/DoubleJump");
+            if (skillData == null)
+                Debug.LogWarning("[DroppedItem] SkillData未設定＆Resourcesに該当スキルなし");
+        }
+    }
     private void Start()
     {
         // デバッグ用
-        if (assignedSkill != null)
-            Debug.Log($"[DroppedItem] {assignedSkill.SkillName} がセットされています。");
+        if (skillData != null)
+            Debug.Log($"[DroppedItem] {skillData.SkillName} がセットされています。");
     }
 
     /// <summary>
     /// スキル情報を割り当てる
     /// </summary>
-    public void AssignSkill(string levelCode)
+    public void AssignSkill(SkillData skill)
     {
-        assignedSkill = SkillDatabase.Instance.GetSkill(levelCode);
-        if (assignedSkill != null)
-            Debug.Log($"💎 DroppedItem にスキル [{assignedSkill.SkillName}] を割り当てました！");
-    }
-    public SkillData GetAssignedSkill()
-    {
-        return assignedSkill;
+        Debug.Log("[DroppedItem.AssignSkill]Called AssignSkill");
+        skillData = skill;
+        defaultIcon = skill != null ? Resources.Load<Sprite>(skill.SkillIcon) : null;
+        if (defaultIcon == null)
+        {
+            Debug.LogWarning($"[DroppedItem] SkillIconが見つかりません: {skill.SkillIcon}");
+        }
     }
 
     /// <summary>
@@ -47,7 +60,7 @@ public class DroppedItem : MonoBehaviour
         if (iconRenderer == null)
             iconRenderer = GetComponentInChildren<SpriteRenderer>();
 
-        if (assignedSkill == null)
+        if (skillData == null)
         {
             iconRenderer.sprite = defaultIcon;
             iconRenderer.color = commonColor;
@@ -55,12 +68,12 @@ public class DroppedItem : MonoBehaviour
         }
 
         // アイコン画像をロード
-        Sprite skillSprite = Resources.Load<Sprite>($"Icons/{assignedSkill.SkillIcon}");
+        Sprite skillSprite = Resources.Load<Sprite>($"Icons/{skillData.SkillIcon}");
         if (skillSprite != null)
             iconRenderer.sprite = skillSprite;
 
         // レアリティ別カラー反映
-        switch (assignedSkill.Rarity)
+        switch (skillData.Rarity)
         {
             case 1: iconRenderer.color = commonColor; break;
             case 2: iconRenderer.color = rareColor; break;
