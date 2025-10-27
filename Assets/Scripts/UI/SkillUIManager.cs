@@ -7,6 +7,13 @@ public class SkillUIManager : MonoBehaviour
 
     [Header("UIスロット（Q=0, W=1, E=2, R=3 の想定）")]
     public SkillSlotUI[] slots;
+    public SkillExecutor executor;
+        [Header("プレイヤーのSkillExecutor")]
+    public SkillExecutor PlayerExecutor;
+
+    [Header("プレイヤーのParameterBase（発動元）")]
+    public ParameterBase playerParameter;
+
 
     private void Awake()
     {
@@ -21,6 +28,13 @@ public class SkillUIManager : MonoBehaviour
         {
             Debug.LogWarning("[SkillUIManager] slots が設定されていません。Inspectorで4つの SkillSlotUI を割り当ててください。");
         }
+    }
+        void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q)) TryUseSkill(0);
+        if (Input.GetKeyDown(KeyCode.W)) TryUseSkill(1);
+        if (Input.GetKeyDown(KeyCode.E)) TryUseSkill(2);
+        if (Input.GetKeyDown(KeyCode.R)) TryUseSkill(3);
     }
 
     /// <summary>
@@ -52,8 +66,28 @@ public class SkillUIManager : MonoBehaviour
             }
         }
 
+
         Debug.LogWarning("[SkillUIManager] 空きスロットがありません。");
     }
+
+    public void TryUseSkill(int index)
+    {
+        if (index < 0 || index >= slots.Length) return;
+        SkillSlotUI slot = slots[index];
+
+        if (slot.assignedSkill == null)
+        {
+            Debug.Log($"[{index}] スキル未登録");
+            return;
+        }
+        if (slot.assignedSkill == null)
+        {
+            Debug.Log("[SkillUIManager.TryUseSkill]ExecuteSkill()を使用しました");
+        }
+        // 実際に発動
+        executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+    }
+
 
     /// <summary>
     /// スロット番号を指定して登録（必要なら使用）

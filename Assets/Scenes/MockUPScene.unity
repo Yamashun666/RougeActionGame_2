@@ -382,7 +382,6 @@ MonoBehaviour:
   iconImage: {fileID: 739173600}
   highlightFrame: {fileID: 0}
   slotIndex: 0
-  assignedSkill: {fileID: 0}
   assignedDroppedItem: {fileID: 0}
 --- !u!1 &190509806
 GameObject:
@@ -708,7 +707,6 @@ MonoBehaviour:
   iconImage: {fileID: 1197214659}
   highlightFrame: {fileID: 0}
   slotIndex: 0
-  assignedSkill: {fileID: 0}
   assignedDroppedItem: {fileID: 0}
 --- !u!1 &425352712
 GameObject:
@@ -849,7 +847,6 @@ MonoBehaviour:
   iconImage: {fileID: 1116374467}
   highlightFrame: {fileID: 0}
   slotIndex: 0
-  assignedSkill: {fileID: 0}
   assignedDroppedItem: {fileID: 0}
 --- !u!1 &441315572
 GameObject:
@@ -3237,6 +3234,7 @@ GameObject:
   - component: {fileID: 1774295979}
   - component: {fileID: 1774295978}
   - component: {fileID: 1774295982}
+  - component: {fileID: 1774295983}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -3342,6 +3340,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SkillOrbDragController
   dragCanvas: {fileID: 1774295980}
   dragIconImage: {fileID: 665782}
+  cachedIcon: {fileID: 0}
+--- !u!114 &1774295983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1774295977}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8c9c490e098cd44ebb50d2e7f8a664d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SkillUIManager
+  skillOrbDragController: {fileID: 1774295982}
+  slots:
+  - {fileID: 1823854965}
+  - {fileID: 435790172}
+  - {fileID: 187424927}
+  - {fileID: 339785452}
+  executor: {fileID: 599978638004244682}
+  PlayerExecutor: {fileID: 599978638004244682}
+  playerParameter: {fileID: 4510536794234290184}
 --- !u!4 &1823854964 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2263429538447617743, guid: 11b46f4375199cc47bef5ce914fa5230,
@@ -3363,7 +3383,6 @@ MonoBehaviour:
   iconImage: {fileID: 138543184}
   highlightFrame: {fileID: 0}
   slotIndex: 0
-  assignedSkill: {fileID: 0}
   assignedDroppedItem: {fileID: 0}
 --- !u!1 &1930440073
 GameObject:
@@ -3804,6 +3823,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8431492964909879837, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: jumpForce
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8431492964909879837, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: moveSpeed
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 8431492964909879837, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}

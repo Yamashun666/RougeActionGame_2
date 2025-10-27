@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -79,32 +80,64 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-    public void DoubleJump()
+
+    public void EnableTemporaryDoubleJump(float duration = 5f)
     {
-        hasUsedDoubleJump = true;
-        canDoubleJump = false; // 一度使ったら消える
-        Debug.Log("🟢 スキルによる二段ジャンプ発動！");
+        StopAllCoroutines(); // 複数スキル重複対策
+        StartCoroutine(DoubleJumpEnableRoutine(duration));
     }
-    public void EnableTemporaryDoubleJump()
+    private IEnumerator DoubleJumpEnableRoutine(float duration)
     {
         canDoubleJump = true;
-        hasUsedDoubleJump = false; // 念のためリセット
-    }
+        hasUsedDoubleJump = false;
+        Debug.Log($"[Player] 二段ジャンプ解禁！（{duration}秒間）");
 
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        canDoubleJump = false;
+        Debug.Log("[Player] 二段ジャンプ効果が終了しました。");
+    }
     void HandleJump()
     {
         if (groundCheck == null) return;
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, 0.1f, groundLayer);
 
-        if (jumpQueued && isGrounded)
+        if (jumpQueued)
         {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-            jumpQueued = false;
+            if (isGrounded)
+            {
+                // 通常ジャンプ
+                Jump();
+                hasUsedDoubleJump = false; // 地面にいるときにリセット
+            }
+            else if (canDoubleJump && !hasUsedDoubleJump)
+            {
+                // 空中でスキルによる二段ジャンプ
+                DoubleJump();
+            }
+
+            jumpQueued = false; // 入力フラグ消費
         }
-
     }
-
+    private void Jump()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f); // 上昇速度をリセットして安定化
+        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        Debug.Log("🟩 通常ジャンプ");
+    }
+    public void DoubleJump()
+    {
+        hasUsedDoubleJump = true;
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        rb.AddForce(Vector2.up * jumpForce * 0.9f, ForceMode2D.Impulse);
+        Debug.Log("🟢 スキルによる二段ジャンプ発動！");
+    }
     private void HandleAttack()
     {
         SkillDatabase.Initialize();

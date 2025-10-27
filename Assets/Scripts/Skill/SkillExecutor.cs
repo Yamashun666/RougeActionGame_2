@@ -56,25 +56,45 @@ public class SkillExecutor : MonoBehaviour
     // =============================
     private void ApplySkillEffect(SkillInstance instance)
     {
-        Damageable damageable = instance.Target.GetComponent<Damageable>();
+        if (instance == null || instance.Data == null)
+        {
+            Debug.LogError("[SkillExecutor] instance または Data が null です。");
+            return;
+        }
 
+        // ターゲットが設定されていない場合、ヒット判定で見つける方式に切り替える
+        Damageable damageable = null;
+        if (instance.Target != null)
+        {
+            damageable = instance.Target.GetComponent<Damageable>();
+        }
+
+        // 各種効果適用
         ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, damageable);
         ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, damageable);
         ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, damageable);
         ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, damageable);
 
+        // 攻撃スキルならヒットボックス起動
         if (IsAttackSkill(instance.Data))
         {
-            if(hitDetector == null)
+            if (hitDetector == null)
             {
                 hitDetector = GetComponent<SkillHitDetector>();
-                Debug.Log("SkillExecutor:hitDetectorがNullです。");
+                if (hitDetector == null)
+                {
+                    Debug.LogError("[SkillExecutor] SkillHitDetector が未設定です。");
+                    return;
+                }
             }
+
+            // ★攻撃スキルは Target ではなく当たり判定から自動判定
             hitDetector.PerformHitDetection(instance, transform);
-            // ✅ 攻撃スキルならHitBoxを有効化！
+
+            // HitBox有効化（オプション）
             HitboxActiveSetter(instance);
         }
-    }
+}
 
     public void HitboxActiveSetter(SkillInstance instance)
     {
@@ -83,27 +103,46 @@ public class SkillExecutor : MonoBehaviour
     }
     private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable)
     {
+        if (skillType == 0) return; // スキル未設定行をスキップ
 
         switch ((SkillType)skillType)
         {
             case SkillType.Attack:
-                ///damageable.TakeDamage(skill.EffectAmount001);
                 lastEffectAmount = skill.EffectAmount001;
-                Debug.Log("[ApplyEffectAmount]" + "現在の攻撃力は" + lastEffectAmount + "です");
+                Debug.Log($"[ApplyEffectAmount] 攻撃力 {lastEffectAmount}");
                 break;
+
             case SkillType.Move:
-                target.MoveSpeed += skill.EffectAmount001;
+                if (target != null)
+                    target.MoveSpeed += skill.EffectAmount001;
                 break;
+
             case SkillType.Heal:
-                target.Heal(skill.EffectAmount001);
+                if (target != null)
+                    target.Heal(skill.EffectAmount001);
                 break;
+
             case SkillType.Buff:
-                target.Attack += skill.EffectAmount001;
-                target.Defense += skill.EffectAmount002;
-                target.MoveSpeed += skill.EffectAmount003;
+                if (target != null)
+                {
+                    target.Attack += skill.EffectAmount001;
+                    target.Defense += skill.EffectAmount002;
+                    target.MoveSpeed += skill.EffectAmount003;
+                }
                 break;
+
             case SkillType.DoubleJump:
-                ExecuteDoubleJump();
+                if (playerController == null)
+                    playerController = FindObjectOfType<PlayerController>();
+
+        if (playerController != null)
+        {
+            // SkillDataに設定されたeffectDurationを使う
+            float duration = skill.effectDuration > 0 ? skill.effectDuration : 5f;
+            playerController.EnableTemporaryDoubleJump(duration);
+
+            Debug.Log($"[SkillExecutor] 二段ジャンプ解禁！（{duration}秒間）");
+        }
                 break;
         }
     }

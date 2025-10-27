@@ -15,20 +15,28 @@ public enum SkillType
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
 public class SkillData : ScriptableObject
 {
+    [Header("スキル基礎情報")]
     public string SkillName;            // スキルの名称
     public string GroupCode;            // レベルすべてを包括したスキルのCODE
     public string LevelCode;            // GroupCodeをスキルレベルごとに分割したCODE
+    public string LevelUPSkillCode;
+    public int CoolTime;
     public int Rarity;                  // このスキルのレアリティ。1=コモン 2=アンコモン 3 = レア 4 = エピック 5 = レジェンダリー
+    public string SkillEnhancementTable;
+    public float effectDuration;
+    public HitShape HitShapeType;
+
+    [Header("使用スキル効果の指定")]
     public int SkillType001;
     public int SkillType002;
     public int SkillType003;
     public int SkillType004;
     public SkillType Type;
+    [Header("スキル効果量の指定")]
     public int EffectAmount001;
     public int EffectAmount002;
     public int EffectAmount003;
-    public int CoolTime;
-    public int LevelUP_LevelCode;
+    [Header("スキル演出素材の指定")]
     public string UseSkillSFX001;
     public float DelayUseSkillSFX001;
     public string UseSkillSFX002;
@@ -37,10 +45,7 @@ public class SkillData : ScriptableObject
     public float DelayUseSkillVFX001;
     public string UseSkillVFX002;
     public float DelayUseSkillVFX002;
-    public string SkillEnhancementTable;
     public string SkillIcon;
-    public string LevelUPSkillCode;
-    public HitShape HitShapeType;
 
     [Header("特殊設定")]
     public bool IsUnique = false;

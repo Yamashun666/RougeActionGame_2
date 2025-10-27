@@ -8,7 +8,7 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
     public Image iconImage;
     public Image highlightFrame;
     public int slotIndex;
-    public SkillData assignedSkill;
+    public SkillData assignedSkill{ get; private set; }
     public DroppedItem assignedDroppedItem;
 
     private Canvas canvas; // 親Canvasを取得してUI座標を変換するため
@@ -25,6 +25,7 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
         canvasGroup = gameObject.AddComponent<CanvasGroup>();
         canvas = GetComponentInParent<Canvas>();
     }
+
 
     // =======================================
     // 💠 スキル登録・削除
