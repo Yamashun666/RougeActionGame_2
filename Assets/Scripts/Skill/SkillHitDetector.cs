@@ -26,6 +26,7 @@ public class SkillHitDetector : MonoBehaviour
 
     public void PerformHitDetection(SkillInstance instance, Transform ModelRoot)
     {
+        Debug.Log("[SkillHitDetector.PerformHitDetection]Called PerformHitDetection");
         // null チェック修正（= → ==）
         if (ModelRoot == null)
         {

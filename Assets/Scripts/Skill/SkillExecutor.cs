@@ -102,14 +102,19 @@ public class SkillExecutor : MonoBehaviour
         }
 
         // 各種効果適用
-        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, damageable);
-        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, damageable);
-        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, damageable);
-        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, damageable);
+        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, damageable, null);
+        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, damageable, null);
+        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, damageable, null);
+        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, damageable, null);
 
         // 攻撃スキルならヒットボックス起動
         if (IsAttackSkill(instance.Data))
         {
+            GenerateHitbox(instance);
+        }
+    }
+    public void GenerateHitbox(SkillInstance instance)
+    {
             if (hitDetector == null)
             {
                 hitDetector = GetComponent<SkillHitDetector>();
@@ -125,7 +130,6 @@ public class SkillExecutor : MonoBehaviour
 
             // HitBox有効化（オプション）
             HitboxActiveSetter(instance);
-        }
     }
 
     public void HitboxActiveSetter(SkillInstance instance)
@@ -133,7 +137,7 @@ public class SkillExecutor : MonoBehaviour
         hitDetector.ActivateHitbox(0.2f); // ← 0.2秒間アクティブ
         hitDetector.PerformHitDetection(instance, transform);
     }
-    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable)
+    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable,SkillInstance instance)
     {
         if (skillType == 0) return; // スキル未設定行をスキップ
 
@@ -171,21 +175,12 @@ public class SkillExecutor : MonoBehaviour
                 break;
 
             case SkillType.StepBackAttack:
-                ExecuteStepBackAttack(skill, target);
-                break;
-
-                if (playerController != null)
-                {
-                    // SkillDataに設定されたeffectDurationを使う
-                    float duration = skill.effectDuration > 0 ? skill.effectDuration : 5f;
-                    playerController.EnableTemporaryDoubleJump(duration);
-
-                    Debug.Log($"[SkillExecutor] 二段ジャンプ解禁！（{duration}秒間）");
-                }
+                lastEffectAmount = skill.EffectAmount001;
+                ExecuteStepBackAttack(skill, target, instance);
                 break;
         }
     }
-    private void ExecuteStepBackAttack(SkillData skill, ParameterBase caster)
+    private void ExecuteStepBackAttack(SkillData skill, ParameterBase caster, SkillInstance instance)
     {
         var player = FindObjectOfType<PlayerController>();
         if (player == null) return;
@@ -203,6 +198,7 @@ public class SkillExecutor : MonoBehaviour
 
         // 3️⃣ 演出呼び出し
         SkillEffectPlayer.Instance?.PlaySkillEffects(skill, player.transform);
+        GenerateHitbox(instance);
     }
 
 
