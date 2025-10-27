@@ -26277,6 +26277,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillExecutor
   lastEffectAmount: 0
+  parameterBase: {fileID: 0}
   hitDetector: {fileID: 0}
   audioSource: {fileID: 0}
   effectOrigin: {fileID: 0}

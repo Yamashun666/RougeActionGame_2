@@ -9051,6 +9051,11 @@ PrefabInstance:
       propertyPath: hitDetector
       value: 
       objectReference: {fileID: 9110141406477703708}
+    - target: {fileID: 3972197319878536539, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: parameterBase
+      value: 
+      objectReference: {fileID: 4510536794234290184}
     - target: {fileID: 4735485366917699720, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}
       propertyPath: MaxHP
