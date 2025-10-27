@@ -10,6 +10,7 @@ public enum SkillType
     Heal = 3,
     Buff = 4,
     DoubleJump = 5,
+    StepBackAttack = 6,
 }
 
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
@@ -46,6 +47,9 @@ public class SkillData : ScriptableObject
     public string UseSkillVFX002;
     public float DelayUseSkillVFX002;
     public string SkillIcon;
+    [Header("StepBackAttack専用パラメータ")]
+    public float StepBackDistance = 2.5f;
+    public float StepBackSpeed = 8f;
 
     [Header("特殊設定")]
     public bool IsUnique = false;

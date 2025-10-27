@@ -72,6 +72,7 @@ public class SkillUIManager : MonoBehaviour
 
     public void TryUseSkill(int index)
     {
+        Debug.Log("[SkillUIManager.TryUseSkill]TryUseSkillCalled");
         if (index < 0 || index >= slots.Length) return;
         SkillSlotUI slot = slots[index];
 

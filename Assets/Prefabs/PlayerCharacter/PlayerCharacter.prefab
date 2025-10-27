@@ -26186,8 +26186,10 @@ MonoBehaviour:
   groundCheck: {fileID: 5376362647489996211}
   parameter: {fileID: 4735485366917699720}
   skillExecutor: {fileID: 0}
+  skillData: {fileID: 0}
   isGrounded: 0
   hitDetector: {fileID: 0}
+  footVFXAnchor: {fileID: 0}
 --- !u!61 &1732261253501711126
 BoxCollider2D:
   m_ObjectHideFlags: 0

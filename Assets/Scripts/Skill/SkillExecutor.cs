@@ -8,6 +8,7 @@ public class SkillExecutor : MonoBehaviour
 {
     public int lastEffectAmount;
     private List<SkillInstance> activeSkills = new List<SkillInstance>();
+    public ParameterBase parameterBase;
     [Header("SkillHitDetector")]
     public SkillHitDetector hitDetector;
 
@@ -70,6 +71,16 @@ public class SkillExecutor : MonoBehaviour
 
         player.EnableTemporaryDoubleJump();
         Debug.Log("[SkillExecutor] 二段ジャンプスキルを発動！");
+
+        // 🟢 ここでエフェクト呼び出し！
+        if (SkillEffectPlayer.Instance != null)
+        {
+            SkillEffectPlayer.Instance.PlaySkillEffects(skill, player.transform);
+        }
+        else
+        {
+            Debug.LogWarning("[SkillExecutor] SkillEffectPlayer.Instance が存在しません。シーンに配置されていますか？");
+        }
     }
     // =============================
     //  効果適用処理
@@ -153,20 +164,47 @@ public class SkillExecutor : MonoBehaviour
                 break;
 
             case SkillType.DoubleJump:
+                Debug.Log("[SkillExecutor.ApplyEffectAmount]Called DoubleJump");
                 if (playerController == null)
                     playerController = FindObjectOfType<PlayerController>();
+                ExecuteDoubleJump(skillData,parameterBase);
+                break;
 
-        if (playerController != null)
-        {
-            // SkillDataに設定されたeffectDurationを使う
-            float duration = skill.effectDuration > 0 ? skill.effectDuration : 5f;
-            playerController.EnableTemporaryDoubleJump(duration);
+            case SkillType.StepBackAttack:
+                ExecuteStepBackAttack(skill, target);
+                break;
 
-            Debug.Log($"[SkillExecutor] 二段ジャンプ解禁！（{duration}秒間）");
-        }
+                if (playerController != null)
+                {
+                    // SkillDataに設定されたeffectDurationを使う
+                    float duration = skill.effectDuration > 0 ? skill.effectDuration : 5f;
+                    playerController.EnableTemporaryDoubleJump(duration);
+
+                    Debug.Log($"[SkillExecutor] 二段ジャンプ解禁！（{duration}秒間）");
+                }
                 break;
         }
     }
+    private void ExecuteStepBackAttack(SkillData skill, ParameterBase caster)
+    {
+        var player = FindObjectOfType<PlayerController>();
+        if (player == null) return;
+
+        Debug.Log("[SkillExecutor] ステップバックアタック発動");
+
+        // 1️⃣ ステップバック
+        player.PerformStepBack(skill.StepBackDistance, skill.StepBackSpeed);
+
+        // 2️⃣ 攻撃判定（ヒットボックス or Raycast）
+        if (hitDetector == null)
+            hitDetector = GetComponent<SkillHitDetector>();
+
+        hitDetector.PerformHitDetection(new SkillInstance(skill, caster, null), player.transform);
+
+        // 3️⃣ 演出呼び出し
+        SkillEffectPlayer.Instance?.PlaySkillEffects(skill, player.transform);
+    }
+
 
 
     private bool IsAttackSkill(SkillData skill)

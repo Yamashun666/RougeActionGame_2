@@ -26,6 +26,10 @@ public class PlayerController : MonoBehaviour
     private bool canDoubleJump = false;  // 今「一度だけ」二段ジャンプができる状態か
     private bool hasUsedDoubleJump = false; // 既に使ったかどうか
     public Transform footVFXAnchor;
+    private bool isStepBackActive = false; // ステップ中フラグ
+    private float stepBackDuration = 0.3f;   // ステップ時間（SkillDataから受け取ってもOK）
+
+
 
 
     void Awake()
@@ -62,25 +66,24 @@ public class PlayerController : MonoBehaviour
 
     void HandleMovement()
     {
-        // AddForce方式を維持して、InputSystem入力を反映
+        if (isStepBackActive) return;  // ← この1行で「ステップ中は入力無視」
+
         if (moveInput.x != 0)
         {
             Vector2 moveForce = new Vector2(moveInput.x * moveSpeed, 0f);
             rb.AddForce(moveForce, ForceMode2D.Force);
-            if (Mathf.Abs(rb.linearVelocity.x) > moveSpeed)
-            {
-                rb.linearVelocity = new Vector2(Mathf.Sign(rb.linearVelocity.x) * moveSpeed, rb.linearVelocity.y);
-            }
-            if (moveInput.x == 0)
-            {
-                // 減速率
-                float decelFactor = 0.85f;
-                rb.linearVelocity = new Vector2(rb.linearVelocity.x * decelFactor, rb.linearVelocity.y);
 
-                // 速度がかなり小さければ完全停止
-                if (Mathf.Abs(rb.linearVelocity.x) < 0.1f)
-                    rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
-            }
+            // 最大速度制限
+            if (Mathf.Abs(rb.linearVelocity.x) > moveSpeed)
+                rb.linearVelocity = new Vector2(Mathf.Sign(rb.linearVelocity.x) * moveSpeed, rb.linearVelocity.y);
+        }
+        else
+        {
+            // 減速処理
+            float decelFactor = 0.85f;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x * decelFactor, rb.linearVelocity.y);
+            if (Mathf.Abs(rb.linearVelocity.x) < 0.1f)
+                rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         }
     }
 
@@ -123,6 +126,7 @@ public class PlayerController : MonoBehaviour
             {
                 // 空中でスキルによる二段ジャンプ
                 DoubleJump(skillData);
+                Debug.Log("DoubleJumpCalled");
             }
 
             jumpQueued = false; // 入力フラグ消費
@@ -177,5 +181,36 @@ public class PlayerController : MonoBehaviour
             Gizmos.color = Color.yellow;
             Gizmos.DrawWireSphere(groundCheck.position, 0.1f);
         }
+    }
+    public void PerformStepBack(float distance, float power)
+    {
+        if (rb == null)
+            rb = GetComponent<Rigidbody2D>();
+
+        // 入力を無効化
+        if (!isStepBackActive)
+            StartCoroutine(StepBackRoutine(distance, power));
+    }
+
+
+    private IEnumerator StepBackRoutine(float distance, float power)
+    {
+        isStepBackActive = true;
+
+        // 現在の向きに応じて反対方向へAddForce
+        float dir = Mathf.Sign(transform.localScale.x);
+        Vector2 stepDir = new Vector2(-dir, 0);
+
+        rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);  // 現在の横移動をリセット
+        float forceAmount = distance * power;
+        rb.AddForce(stepDir * forceAmount, ForceMode2D.Impulse);
+
+        Debug.Log($"[StepBack] AddForce dir={stepDir}, force={forceAmount}");
+
+        // ステップ中の入力を一時無効化
+        yield return new WaitForSeconds(stepBackDuration);
+
+        isStepBackActive = false;
+        Debug.Log("[StepBack] 終了（入力再開）");
     }
 }

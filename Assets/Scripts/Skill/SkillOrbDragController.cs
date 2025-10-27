@@ -108,6 +108,8 @@ public class SkillOrbDragController : MonoBehaviour
         draggedSkill = skill;
         originDroppedItem = drop;
         cachedIcon = drop.defaultIcon;
+        Debug.Log($"[SkillOrbDragController] draggedSkill={draggedSkill?.SkillName ?? "null"}");
+
 
         if (dragIconImage != null)
         {

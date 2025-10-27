@@ -154,5 +154,20 @@ public class HitboxEventReceiver : MonoBehaviour
         }
 
     }
+    public void PerformStepBackHit(SkillInstance instance, Transform origin)
+    {
+        float range = 3f;
+        Vector2 dir = origin.localScale.x > 0 ? Vector2.right : Vector2.left;
+
+        RaycastHit2D[] hits = Physics2D.RaycastAll(origin.position, dir, range, LayerMask.GetMask("Enemy"));
+        foreach (var hit in hits)
+        {
+            if (hit.collider.TryGetComponent(out Damageable dmg))
+            {
+                dmg.TakeDamage(instance.Data.EffectAmount001);
+                Debug.Log($"[StepBackHit] {hit.collider.name} に {instance.Data.EffectAmount001} ダメージ");
+            }
+        }
+    }
 
 }
