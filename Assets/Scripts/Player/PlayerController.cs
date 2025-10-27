@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour
     [Header("参照")]
     public ParameterBase parameter;
     public SkillExecutor skillExecutor;
+    public SkillData skillData;
 
     private Rigidbody2D rb;
     private PlayerInputActions inputActions;
@@ -24,6 +25,8 @@ public class PlayerController : MonoBehaviour
     public SkillHitDetector hitDetector;
     private bool canDoubleJump = false;  // 今「一度だけ」二段ジャンプができる状態か
     private bool hasUsedDoubleJump = false; // 既に使ったかどうか
+    public Transform footVFXAnchor;
+
 
     void Awake()
     {
@@ -119,7 +122,7 @@ public class PlayerController : MonoBehaviour
             else if (canDoubleJump && !hasUsedDoubleJump)
             {
                 // 空中でスキルによる二段ジャンプ
-                DoubleJump();
+                DoubleJump(skillData);
             }
 
             jumpQueued = false; // 入力フラグ消費
@@ -131,11 +134,13 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         Debug.Log("🟩 通常ジャンプ");
     }
-    public void DoubleJump()
+    public void DoubleJump(SkillData skill)
     {
         hasUsedDoubleJump = true;
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
         rb.AddForce(Vector2.up * jumpForce * 0.9f, ForceMode2D.Impulse);
+        SkillEffectPlayer.Instance.PlaySkillEffects(skill, transform);
+
         Debug.Log("🟢 スキルによる二段ジャンプ発動！");
     }
     private void HandleAttack()

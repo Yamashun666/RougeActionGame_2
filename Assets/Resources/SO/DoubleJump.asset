@@ -15,7 +15,12 @@ MonoBehaviour:
   SkillName: DoubleJump
   GroupCode: 0003
   LevelCode: 0003_01
+  LevelUPSkillCode: 
+  CoolTime: 0
   Rarity: 0
+  SkillEnhancementTable: 
+  effectDuration: 5
+  HitShapeType: 0
   SkillType001: 5
   SkillType002: 0
   SkillType003: 0
@@ -24,18 +29,13 @@ MonoBehaviour:
   EffectAmount001: 0
   EffectAmount002: 0
   EffectAmount003: 0
-  CoolTime: 0
-  LevelUP_LevelCode: 0
   UseSkillSFX001: 
   DelayUseSkillSFX001: 0
   UseSkillSFX002: 
   DelayUseSkillSFX002: 0
-  UseSkillVFX001: 
+  UseSkillVFX001: DoubleJump_Wind
   DelayUseSkillVFX001: 0
   UseSkillVFX002: 
   DelayUseSkillVFX002: 0
-  SkillEnhancementTable: 
   SkillIcon: 
-  LevelUPSkillCode: 
-  HitShapeType: 0
   IsUnique: 0

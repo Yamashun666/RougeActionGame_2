@@ -26279,6 +26279,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   effectOrigin: {fileID: 0}
   playerController: {fileID: 0}
+  skillData: {fileID: 0}
 --- !u!1 &6845085077493994134
 GameObject:
   m_ObjectHideFlags: 0

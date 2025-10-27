@@ -15,6 +15,7 @@ public class SkillExecutor : MonoBehaviour
     public AudioSource audioSource;
     public Transform effectOrigin;
     public PlayerController playerController;
+    public SkillData skillData;
 
 
     private void Start()
@@ -23,6 +24,26 @@ public class SkillExecutor : MonoBehaviour
         Debug.Log($"[SkillExecutor] hitDetector取得確認: {(hitDetector == null ? "null" : hitDetector.name)}");
         playerController = GetComponent<PlayerController>();
     }
+        private void Update()
+    {
+        for (int i = activeSkills.Count - 1; i >= 0; i--)
+        {
+            SkillInstance inst = activeSkills[i];
+            if (!inst.IsActive)
+            {
+                activeSkills.RemoveAt(i);
+                continue;
+            }
+
+            inst.Timer += Time.deltaTime;
+
+            if (inst.Timer >= inst.Data.CoolTime / 1000f)
+            {
+                inst.IsActive = false;
+                Debug.Log($"[SkillExecutor] {inst.Data.SkillName} のクールタイム終了");
+            }
+        }
+    }
 
 
     // =============================
@@ -30,6 +51,7 @@ public class SkillExecutor : MonoBehaviour
     // =============================
     public void ExecuteSkill(SkillData skill, ParameterBase caster, ParameterBase target)
     {
+        Debug.Log("ExecuteSkill()Called");
         if (skill == null || caster == null)
         {
             Debug.LogWarning("[SkillExecutor] 無効なスキルまたはキャスターが指定されました。");
@@ -38,24 +60,23 @@ public class SkillExecutor : MonoBehaviour
 
         SkillInstance instance = new SkillInstance(skill, caster, target);
         activeSkills.Add(instance);
-
-        StartCoroutine(PlaySkillEffects(instance));
         ApplySkillEffect(instance);
     }
     public void ExecuteDoubleJump(SkillData skill, ParameterBase caster)
     {
+        Debug.Log("ExecuteDoubleJump Called");
         var player = FindObjectOfType<PlayerController>();
         if (player == null) return;
 
         player.EnableTemporaryDoubleJump();
         Debug.Log("[SkillExecutor] 二段ジャンプスキルを発動！");
     }
-
     // =============================
     //  効果適用処理
     // =============================
     private void ApplySkillEffect(SkillInstance instance)
     {
+        Debug.Log("ApplySkillEffect Called");
         if (instance == null || instance.Data == null)
         {
             Debug.LogError("[SkillExecutor] instance または Data が null です。");
@@ -94,7 +115,7 @@ public class SkillExecutor : MonoBehaviour
             // HitBox有効化（オプション）
             HitboxActiveSetter(instance);
         }
-}
+    }
 
     public void HitboxActiveSetter(SkillInstance instance)
     {
@@ -156,72 +177,4 @@ public class SkillExecutor : MonoBehaviour
                skill.SkillType004 == (int)SkillType.Attack;
     }
 
-    private void ExecuteDoubleJump()
-    {
-        
-    }
-
-    // =============================
-    //  SFX / VFX 管理
-    // =============================
-    private IEnumerator PlaySkillEffects(SkillInstance instance)
-    {
-        SkillData skill = instance.Data;
-
-        // SFX
-        if (!string.IsNullOrEmpty(skill.UseSkillSFX001))
-            yield return StartCoroutine(PlaySFXDelayed(skill.UseSkillSFX001, skill.DelayUseSkillSFX001));
-        if (!string.IsNullOrEmpty(skill.UseSkillSFX002))
-            yield return StartCoroutine(PlaySFXDelayed(skill.UseSkillSFX002, skill.DelayUseSkillSFX002));
-
-        // VFX
-        if (!string.IsNullOrEmpty(skill.UseSkillVFX001))
-            yield return StartCoroutine(PlayVFXDelayed(skill.UseSkillVFX001, skill.DelayUseSkillVFX001));
-        if (!string.IsNullOrEmpty(skill.UseSkillVFX002))
-            yield return StartCoroutine(PlayVFXDelayed(skill.UseSkillVFX002, skill.DelayUseSkillVFX002));
-    }
-
-    private IEnumerator PlaySFXDelayed(string sfxName, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        AudioClip clip = Resources.Load<AudioClip>(sfxName);
-        if (clip != null && audioSource != null)
-            audioSource.PlayOneShot(clip);
-        else
-            Debug.LogWarning($"[SFX] {sfxName} が見つからないか AudioSource が未設定です。");
-    }
-
-    private IEnumerator PlayVFXDelayed(string vfxName, float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        GameObject prefab = Resources.Load<GameObject>(vfxName);
-        if (prefab != null && effectOrigin != null)
-            Instantiate(prefab, effectOrigin.position, Quaternion.identity);
-        else
-            Debug.LogWarning($"[VFX] {vfxName} が見つからないか effectOrigin が未設定です。");
-    }
-
-    // =============================
-    //  クールタイム管理
-    // =============================
-    private void Update()
-    {
-        for (int i = activeSkills.Count - 1; i >= 0; i--)
-        {
-            SkillInstance inst = activeSkills[i];
-            if (!inst.IsActive)
-            {
-                activeSkills.RemoveAt(i);
-                continue;
-            }
-
-            inst.Timer += Time.deltaTime;
-
-            if (inst.Timer >= inst.Data.CoolTime / 1000f)
-            {
-                inst.IsActive = false;
-                Debug.Log($"[SkillExecutor] {inst.Data.SkillName} のクールタイム終了");
-            }
-        }
-    }
 }
