@@ -200,6 +200,23 @@ public class SkillExecutor : MonoBehaviour
         SkillEffectPlayer.Instance?.PlaySkillEffects(skill, player.transform);
         GenerateHitbox(instance);
     }
+    private void ExecuteJetBoost(SkillData skill, ParameterBase caster)
+    {
+        var player = FindObjectOfType<PlayerController>();
+        if (player == null) return;
+
+        // 推力・重力係数をSkillDataのEffectAmountから取得
+        float thrustPower = (float)skill.EffectAmount001;
+        float gravityScale = skill.EffectAmount002 > 0 ? (float)skill.EffectAmount002 / 100f : 0.5f;
+        float duration = skill.EffectAmount003 > 0 ? skill.EffectAmount003 : 2f;
+
+        Debug.Log($"[SkillExecutor] JetBoost発動: thrust={thrustPower}, gravityScale={gravityScale}, duration={duration}");
+
+        player.StartJetBoost(thrustPower, gravityScale, duration);
+
+        // エフェクト・サウンド再生（任意）
+        SkillEffectPlayer.Instance?.PlaySkillEffects(skill, player.transform);
+    }
 
 
 

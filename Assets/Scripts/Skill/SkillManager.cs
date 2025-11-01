@@ -11,6 +11,7 @@ public enum SkillType
     Buff = 4,
     DoubleJump = 5,
     StepBackAttack = 6,
+    JetBoost = 7,
 }
 
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]

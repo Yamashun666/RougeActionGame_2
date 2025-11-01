@@ -37,14 +37,6 @@ public class PlayerInventory : MonoBehaviour
             // ドラッグモード開始（今後UIでの操作用）
             StartDragMode(nearbyDrop);
 
-            // 🧠 スキル登録（今は即登録、将来的にドラッグ後に登録する想定）
-            skillManager.AddSkill(skill);
-            Debug.Log($"🧠 スキル [{skill.SkillName}] を取得しました！");
-
-            if (SkillUIManager.Instance != null)
-            {
-                SkillUIManager.Instance.RegisterSkillToNextSlot(skill, nearbyDrop);
-            }
             nearbyDrop = null;
             canInteract = false;
         }

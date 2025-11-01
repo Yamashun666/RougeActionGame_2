@@ -18,12 +18,14 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
 
     private Vector2 originalPosition;
     private bool isDragging = false;
+    private PlayerController playerController;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         canvasGroup = gameObject.AddComponent<CanvasGroup>();
         canvas = GetComponentInParent<Canvas>();
+        playerController = FindObjectOfType<PlayerController>();
     }
 
 
@@ -59,6 +61,16 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
         else
         {
             Debug.LogWarning($"[SkillSlotUI] スロット {slotIndex} に表示可能なアイコンがありません。");
+        }
+        if (playerController != null)
+        {
+            if (skill.SkillType001 == 8 || skill.SkillType002 == 8 ||
+                skill.SkillType003 == 8 || skill.SkillType004 == 8)
+            {
+                playerController.hasJetBoost = true;
+                playerController.jetBoostSkill = skill;  // ← これ大事
+                Debug.Log("[SkillSlotUI] JetBoostスキル検出 → isJetBoostActive = TRUE");
+            }
         }
     }
 
@@ -110,6 +122,7 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
 
         SkillOrbDragController.Instance.BeginDragFromSlot(this);
         Debug.Log($"[SkillSlotUI] Slot {slotIndex} からドラッグ開始");
+
     }
 
     public void OnDrag(PointerEventData eventData)

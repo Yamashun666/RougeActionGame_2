@@ -28,6 +28,11 @@ public class PlayerController : MonoBehaviour
     public Transform footVFXAnchor;
     private bool isStepBackActive = false; // ステップ中フラグ
     private float stepBackDuration = 0.3f;   // ステップ時間（SkillDataから受け取ってもOK）
+    private bool isJetBoosting = false;  // いまブースト中か（実行状態）
+    public bool hasJetBoost = false;
+    public SkillData jetBoostSkill;      // JetBoost用のSkillData参照
+
+    private float jetBoostEndTime;
 
 
 
@@ -86,12 +91,76 @@ public class PlayerController : MonoBehaviour
                 rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         }
     }
+    public void StartJetBoost(float thrustPower, float gravityScale, float duration)
+    {
+        if (isJetBoosting) return;     // 多重起動防止
+        StartCoroutine(JetBoostRoutine(thrustPower, gravityScale, duration));
+    }
 
+    private IEnumerator JetBoostRoutine(float thrustPower, float gravityScale, float duration)
+    {
+        isJetBoosting = true;
+
+        float originalGravity = rb.gravityScale;
+        float originalDrag = rb.linearDamping;
+
+        rb.gravityScale = gravityScale;
+        rb.linearDamping = 0.5f; // 上昇中の初期値
+
+        float elapsed = 0f;
+        float maxUpVelocity = 12f;
+
+        Debug.Log($"[JetBoost] 開始: thrust={thrustPower}, gravityScale={gravityScale}, duration={duration}");
+
+        rb.AddForce(Vector2.up * thrustPower * 0.8f, ForceMode2D.Impulse);
+
+        while (elapsed < duration)
+        {
+            if (inputActions.Player.Jump.IsPressed())
+            {
+                if (rb.linearVelocity.y < maxUpVelocity)
+                    rb.AddForce(Vector2.up * thrustPower * 0.15f, ForceMode2D.Impulse);
+            }
+            else
+            {
+                Debug.Log("[JetBoost] ジャンプキー離し → ブースト解除＆落下");
+                break;
+            }
+
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        // 🪂 滞空フェーズ: dragを0.5→1.0にゆっくり補間
+        float dragDuration = 0.5f;
+        float dragElapsed = 0f;
+
+        while (dragElapsed < dragDuration)
+        {
+            rb.linearDamping = Mathf.Lerp(0.5f, 1.0f, dragElapsed / dragDuration);
+            dragElapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        rb.linearDamping = 1.0f; // 最終 drag 確定
+        yield return new WaitForSeconds(0.3f);
+
+        // 🔽 徐々に重力を戻す
+        rb.gravityScale = Mathf.Lerp(rb.gravityScale, originalGravity, 0.5f);
+        yield return new WaitForSeconds(0.2f);
+
+        rb.gravityScale = originalGravity;
+        rb.linearDamping = originalDrag;
+        isJetBoosting = false;
+
+        Debug.Log("[JetBoost] 終了（drag戻す・重力戻す）");
+    }
     public void EnableTemporaryDoubleJump(float duration = 5f)
     {
         StopAllCoroutines(); // 複数スキル重複対策
         StartCoroutine(DoubleJumpEnableRoutine(duration));
     }
+
     private IEnumerator DoubleJumpEnableRoutine(float duration)
     {
         canDoubleJump = true;
@@ -116,22 +185,43 @@ public class PlayerController : MonoBehaviour
 
         if (jumpQueued)
         {
-            if (isGrounded)
-            {
-                // 通常ジャンプ
-                Jump();
-                hasUsedDoubleJump = false; // 地面にいるときにリセット
-            }
-            else if (canDoubleJump && !hasUsedDoubleJump)
-            {
-                // 空中でスキルによる二段ジャンプ
-                DoubleJump(skillData);
-                Debug.Log("DoubleJumpCalled");
-            }
+            jumpQueued = false; // 入力消費
 
-            jumpQueued = false; // 入力フラグ消費
+            // JetBoost装備中ならジャンプを置換
+            if (hasJetBoost && jetBoostSkill != null)
+            {
+                // JetBoostを発動する（地上のみ）
+                if (isGrounded && !isJetBoosting)
+                {
+                    float thrust   = (float)jetBoostSkill.EffectAmount001;
+                    float grav     = jetBoostSkill.EffectAmount002 > 0 ? jetBoostSkill.EffectAmount002 / 100f : 0.5f;
+                    float duration = jetBoostSkill.EffectAmount003 > 0 ? jetBoostSkill.EffectAmount003 : 2f;
+
+                    StartJetBoost(thrust, grav, duration);
+                    Debug.Log("[HandleJump] JetBoost 発動");
+                }
+                else
+                {
+                    Debug.Log("[HandleJump] JetBoost中 or 空中 → 通常ジャンプ抑制");
+                }
+            }
+            else
+            {
+                // JetBoostを持っていないなら通常ジャンプ
+                if (isGrounded)
+                {
+                    Jump();
+                    hasUsedDoubleJump = false;
+                }
+                else if (canDoubleJump && !hasUsedDoubleJump)
+                {
+                    DoubleJump(skillData);
+                }
+            }
         }
     }
+
+
     private void Jump()
     {
         rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f); // 上昇速度をリセットして安定化
