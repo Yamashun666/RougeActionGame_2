@@ -35,7 +35,9 @@ public class Damageable : MonoBehaviour
     }
     public void TakeDamage(int damage)
     {
-        Debug.Log("あああいたいいいいいい" + damage);
+        Debug.Log($"[Damageable] TakeDamage() 呼ばれた: dmg={damage}");
+        Debug.Log($"[Damageable] HPチェック: {parameterBase.CurrentHP}/{parameterBase.MaxHP}");
+
         if (parameterBase.LimitOverHP > 0)
         {
             int reduce = Mathf.Min(damage, parameterBase.LimitOverHP);

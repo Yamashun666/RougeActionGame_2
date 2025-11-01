@@ -18,6 +18,7 @@ public class SkillExecutor : MonoBehaviour
     public PlayerController playerController;
     public SkillData skillData;
     MagicProjectile magicProjectile;
+    Damageable damageable;
 
 
     private void Start()
@@ -188,19 +189,18 @@ public class SkillExecutor : MonoBehaviour
             return;
         }
 
-        // ダメージ計算: lastEffectAmountを使用
-        int damage = Mathf.Max(1, lastEffectAmount - target.Defense);
-        target.CurrentHP -= damage;
-
-        Debug.Log($"[OnHitEnemy] {target.name} に {damage} ダメージを与えた！（残りHP: {target.CurrentHP}）");
-
-        // HPが0以下なら死亡処理イベント発火
-        if (target.CurrentHP <= 0)
+        // Damageableコンポーネント経由で処理
+        var damageable = target.GetComponent<Damageable>();
+        if (damageable == null)
         {
-            target.CurrentHP = 0;
-            target.TriggerDeath();
-            Debug.Log($"💀 {target.Name} が倒された！");
+            Debug.LogWarning("[SkillExecutor.OnHitEnemy] Damageableが見つかりません。");
+            return;
         }
+
+        int damage = Mathf.Max(1, lastEffectAmount - target.Defense);
+        damageable.TakeDamage(damage);
+
+        Debug.Log($"[OnHitEnemy] {target.name} に {damage} ダメージを与えた！");
     }
 
 
