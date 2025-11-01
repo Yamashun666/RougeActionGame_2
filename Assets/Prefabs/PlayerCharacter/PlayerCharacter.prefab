@@ -26190,6 +26190,9 @@ MonoBehaviour:
   isGrounded: 0
   hitDetector: {fileID: 0}
   footVFXAnchor: {fileID: 0}
+  hasJetBoost: 0
+  jetBoostSkill: {fileID: 0}
+  magicOrigin: {fileID: 0}
 --- !u!61 &1732261253501711126
 BoxCollider2D:
   m_ObjectHideFlags: 0

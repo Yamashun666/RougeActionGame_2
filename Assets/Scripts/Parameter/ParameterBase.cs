@@ -92,7 +92,7 @@ public class ParameterBase : MonoBehaviour
             CurrentHP = newHP;
         }
     }
-// ParameterBase.cs
+    // ParameterBase.cs
     public void TakeDamage(int damage)
     {
         // Damageableがいれば、そっちで処理を完結
@@ -112,6 +112,13 @@ public class ParameterBase : MonoBehaviour
             }
         }
     }
+    // ParameterBase.cs
+    public void TriggerDeath()
+    {
+        OnDeath?.Invoke();
+        Debug.Log($"[ParameterBase] {Name} が死亡イベントを発火しました。");
+    }
+
 
     /// <summary>
     /// キャラクター死亡時の処理。

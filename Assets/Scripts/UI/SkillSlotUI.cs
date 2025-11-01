@@ -64,8 +64,8 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
         }
         if (playerController != null)
         {
-            if (skill.SkillType001 == 8 || skill.SkillType002 == 8 ||
-                skill.SkillType003 == 8 || skill.SkillType004 == 8)
+            if (skill.SkillType001 == 7 || skill.SkillType002 == 7 ||
+                skill.SkillType003 == 7 || skill.SkillType004 == 7)
             {
                 playerController.hasJetBoost = true;
                 playerController.jetBoostSkill = skill;  // ← これ大事

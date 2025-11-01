@@ -17,6 +17,7 @@ public class SkillExecutor : MonoBehaviour
     public Transform effectOrigin;
     public PlayerController playerController;
     public SkillData skillData;
+    MagicProjectile magicProjectile;
 
 
     private void Start()
@@ -58,7 +59,7 @@ public class SkillExecutor : MonoBehaviour
             Debug.LogWarning("[SkillExecutor] 無効なスキルまたはキャスターが指定されました。");
             return;
         }
-
+        Debug.Log($"[ExecuteSkill] {skill.SkillName} type(int)={skill.SkillType001} enum={(SkillType)skill.SkillType001}");
         SkillInstance instance = new SkillInstance(skill, caster, target);
         activeSkills.Add(instance);
         ApplySkillEffect(instance);
@@ -82,6 +83,53 @@ public class SkillExecutor : MonoBehaviour
             Debug.LogWarning("[SkillExecutor] SkillEffectPlayer.Instance が存在しません。シーンに配置されていますか？");
         }
     }
+    private void ExecuteProjectile(SkillData skill, ParameterBase caster)
+    {
+        Debug.Log("[ExecuteProjectile] 呼ばれた");
+
+        if (skill == null)
+        {
+            Debug.LogError("[ExecuteProjectile] skill が null");
+            return;
+        }
+
+        if (skill.ProjectilePrefab == null)
+        {
+            Debug.LogError("[ExecuteProjectile] ProjectilePrefab が null");
+            return;
+        }
+
+        PlayerController player = FindObjectOfType<PlayerController>();
+        if (player == null)
+        {
+            Debug.LogError("[ExecuteProjectile] PlayerController が null");
+            return;
+        }
+
+        Debug.Log($"[ExecuteProjectile] player 取得成功: {player.name}");
+
+        if (player.magicOrigin == null)
+        {
+            Debug.LogError("[ExecuteProjectile] magicOrigin が null");
+            return;
+        }
+
+        GameObject projectile = Instantiate(skill.ProjectilePrefab, player.magicOrigin.position, Quaternion.identity);
+        Debug.Log($"[ExecuteProjectile] Projectile生成: {projectile.name}");
+
+        var proj = projectile.GetComponent<MagicProjectile>();
+        if (proj == null)
+        {
+            Debug.LogError("[ExecuteProjectile] MagicProjectile スクリプトがPrefabにアタッチされていません！");
+            return;
+        }
+
+        proj.Initialize(skill, caster, Mathf.Sign(player.transform.localScale.x));
+        Debug.Log("[ExecuteProjectile] Initialize完了");
+    }
+
+
+
     // =============================
     //  効果適用処理
     // =============================
@@ -115,22 +163,46 @@ public class SkillExecutor : MonoBehaviour
     }
     public void GenerateHitbox(SkillInstance instance)
     {
+        if (hitDetector == null)
+        {
+            hitDetector = GetComponent<SkillHitDetector>();
             if (hitDetector == null)
             {
-                hitDetector = GetComponent<SkillHitDetector>();
-                if (hitDetector == null)
-                {
-                    Debug.LogError("[SkillExecutor] SkillHitDetector が未設定です。");
-                    return;
-                }
+                Debug.LogError("[SkillExecutor] SkillHitDetector が未設定です。");
+                return;
             }
+        }
 
-            // ★攻撃スキルは Target ではなく当たり判定から自動判定
-            hitDetector.PerformHitDetection(instance, transform);
+        // ★攻撃スキルは Target ではなく当たり判定から自動判定
+        hitDetector.PerformHitDetection(instance, transform);
 
-            // HitBox有効化（オプション）
-            HitboxActiveSetter(instance);
+        // HitBox有効化（オプション）
+        HitboxActiveSetter(instance);
     }
+    // SkillExecutor.cs 内に追加
+    public void OnHitEnemy(ParameterBase target)
+    {
+        if (target == null)
+        {
+            Debug.LogWarning("[SkillExecutor.OnHitEnemy] targetがnullです。");
+            return;
+        }
+
+        // ダメージ計算: lastEffectAmountを使用
+        int damage = Mathf.Max(1, lastEffectAmount - target.Defense);
+        target.CurrentHP -= damage;
+
+        Debug.Log($"[OnHitEnemy] {target.name} に {damage} ダメージを与えた！（残りHP: {target.CurrentHP}）");
+
+        // HPが0以下なら死亡処理イベント発火
+        if (target.CurrentHP <= 0)
+        {
+            target.CurrentHP = 0;
+            target.TriggerDeath();
+            Debug.Log($"💀 {target.Name} が倒された！");
+        }
+    }
+
 
     public void HitboxActiveSetter(SkillInstance instance)
     {
@@ -177,6 +249,10 @@ public class SkillExecutor : MonoBehaviour
             case SkillType.StepBackAttack:
                 lastEffectAmount = skill.EffectAmount001;
                 ExecuteStepBackAttack(skill, target, instance);
+                break;
+            case SkillType.RangedMagic:
+                Debug.Log("[SkillExecutor.ApplyEffectAmount]Called RangedMagic");
+                ExecuteProjectile(skill, target);
                 break;
         }
     }

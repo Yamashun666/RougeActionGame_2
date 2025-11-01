@@ -12,6 +12,7 @@ public enum SkillType
     DoubleJump = 5,
     StepBackAttack = 6,
     JetBoost = 7,
+    RangedMagic = 8,
 }
 
 [CreateAssetMenu(fileName = "NewSkill", menuName = "Skill/SkillData")]
@@ -54,6 +55,8 @@ public class SkillData : ScriptableObject
 
     [Header("特殊設定")]
     public bool IsUnique = false;
+    [Header("Projectile設定")]
+    public GameObject ProjectilePrefab;
 }
 
 //////////////////////////////////////////////////////////

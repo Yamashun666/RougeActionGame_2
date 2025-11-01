@@ -31,12 +31,7 @@ public class PlayerController : MonoBehaviour
     private bool isJetBoosting = false;  // いまブースト中か（実行状態）
     public bool hasJetBoost = false;
     public SkillData jetBoostSkill;      // JetBoost用のSkillData参照
-
-    private float jetBoostEndTime;
-
-
-
-
+    public Transform magicOrigin;
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();

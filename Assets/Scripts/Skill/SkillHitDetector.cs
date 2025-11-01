@@ -142,19 +142,27 @@ public class HitboxEventReceiver : MonoBehaviour
 {
     public SkillExecutor executor;
 
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerEnter2D(Collider2D other)
     {
+        if (!other.CompareTag("Enemy")) return;
 
-        if (other.CompareTag("Enemy"))
+        var executor = GetComponentInParent<SkillExecutor>();
+        if (executor == null)
         {
-            var damage = other.GetComponent<Damageable>();
-            var parameter = other.GetComponent<ParameterBase>();
-            damage.TakeDamage(executor.lastEffectAmount);
-            Debug.Log(parameter.CurrentHP);
-            gameObject.SetActive(false);
+            Debug.LogWarning("[HitboxEventReceiver] SkillExecutorが見つかりません。親参照が切れています。");
+            return;
         }
 
+        ParameterBase targetParam = other.GetComponent<ParameterBase>();
+        if (targetParam == null)
+        {
+            Debug.LogWarning("[HitboxEventReceiver] ParameterBaseが敵に存在しません。");
+            return;
+        }
+
+        executor.OnHitEnemy(targetParam); // ← SkillExecutor側の処理に飛ばす
     }
+
     public void PerformStepBackHit(SkillInstance instance, Transform origin)
     {
         float range = 3f;
