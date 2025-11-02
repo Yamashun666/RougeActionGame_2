@@ -1,72 +1,93 @@
 using UnityEngine;
 
+/// <summary>
+/// 敵AIの基本クラス。全AI共通の参照・基礎機能を提供。
+/// </summary>
+[RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(ParameterBase))]
-public class EnemyAIController : MonoBehaviour
+[RequireComponent(typeof(SkillExecutor))]
+public abstract class EnemyAIController : MonoBehaviour
 {
-    [Header("ターゲット設定")]
-    public Transform player;             // プレイヤー（自動追尾対象）
+    [Header("基本参照")]
+    public Rigidbody2D rb;
+    public ParameterBase parameter;
+    public SkillExecutor skillExecutor;
+    public Transform player;
 
-    [Header("移動パラメータ")]
-    public float moveSpeed = 2f;
-    public float stopDistance = 1.5f;    // これ以下で停止
+    [Header("移動設定")]
+    public float moveSpeed = 3f;
+    public float detectionRange = 15f;
+    public float attackRange = 5f;
+    public float stopDistance = 1f;
 
-    [Header("攻撃設定")]
-    public SkillData defaultAttackSkill; // 使用する攻撃スキル
-    public float attackRange = 2f;
-    public float attackCooldown = 2f;    // 攻撃間隔（秒）
-
-    private ParameterBase enemyParam;
-    private SkillExecutor skillExecutor;
-    private float attackTimer;
-
-    private void Awake()
+    protected virtual void Awake()
     {
-        enemyParam = GetComponent<ParameterBase>();
-        skillExecutor = FindObjectOfType<SkillExecutor>();
-
-        if (player == null)
-        {
-            GameObject playerObj = GameObject.FindWithTag("Player");
-            if (playerObj != null) player = playerObj.transform;
-        }
+        rb = GetComponent<Rigidbody2D>();
+        parameter = GetComponent<ParameterBase>();
+        skillExecutor = GetComponent<SkillExecutor>();
     }
 
-    private void Update()
+    protected virtual void Start()
     {
-        if (player == null) return;
-
-        // 死亡してたら動かない
-        if (enemyParam.CurrentHP <= 0) return;
-
-        float distance = Vector2.Distance(transform.position, player.position);
-
-        // 攻撃範囲外 → 追いかける
-        if (distance > attackRange)
-        {
-            MoveTowardsPlayer();
-        }
-        else
-        {
-            // 攻撃範囲内 → 攻撃処理
-            HandleAttack(distance);
-        }
-
-        attackTimer += Time.deltaTime;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+            player = playerObj.transform;
     }
 
-    private void MoveTowardsPlayer()
+    protected virtual void Update()
     {
-        Vector2 direction = (player.position - transform.position).normalized;
-        transform.position += (Vector3)direction * moveSpeed * Time.deltaTime;
+        if (player == null || parameter.CurrentHP <= 0)
+            return;
+
+        Think();
     }
 
-    private void HandleAttack(float distance)
+    /// <summary>
+    /// 各AI固有の思考処理
+    /// </summary>
+    protected abstract void Think();
+
+    /// <summary>
+    /// プレイヤーとの距離を返す
+    /// </summary>
+    protected float GetDistanceToPlayer()
     {
-        if (attackTimer >= attackCooldown && defaultAttackSkill != null)
-        {
-            skillExecutor.ExecuteSkill(defaultAttackSkill, enemyParam, enemyParam); // 仮で自己参照
-            Debug.Log($"Enemy attacks player with {defaultAttackSkill.SkillName}");
-            attackTimer = 0f;
-        }
+        return player ? Vector2.Distance(transform.position, player.position) : Mathf.Infinity;
+    }
+
+    /// <summary>
+    /// プレイヤーの方向を返す（-1 or +1）
+    /// </summary>
+    protected float GetDirectionToPlayer()
+    {
+        if (player == null) return 0f;
+        return Mathf.Sign(player.position.x - transform.position.x);
+    }
+
+    /// <summary>
+    /// プレイヤーに向く
+    /// </summary>
+    protected void FacePlayer()
+    {
+        float dir = GetDirectionToPlayer();
+        if (dir != 0)
+            transform.localScale = new Vector3(dir, 1, 1);
+    }
+
+    /// <summary>
+    /// 移動（AddForceベース）
+    /// </summary>
+    protected void MoveTowardsPlayer()
+    {
+        Vector2 dir = (player.position - transform.position).normalized;
+        rb.AddForce(new Vector2(dir.x * moveSpeed, 0f), ForceMode2D.Force);
+    }
+
+    /// <summary>
+    /// 停止
+    /// </summary>
+    protected void StopMovement()
+    {
+        rb.linearVelocity = Vector2.zero;
     }
 }

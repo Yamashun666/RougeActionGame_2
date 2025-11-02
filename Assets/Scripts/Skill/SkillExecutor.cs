@@ -124,7 +124,6 @@ public class SkillExecutor : MonoBehaviour
             return;
         }
 
-        // Damageableコンポーネント経由で処理
         var damageable = target.GetComponent<Damageable>();
         if (damageable == null)
         {
@@ -135,10 +134,11 @@ public class SkillExecutor : MonoBehaviour
         int damage = Mathf.Max(1, lastEffectAmount - target.Defense);
         damageable.TakeDamage(damage);
 
-        Debug.Log($"[OnHitEnemy] {target.name} に {damage} ダメージを与えた！");
+        Debug.Log($"[OnHitEnemy] {target.name} に {damage} ダメージを与えました！");
     }
 
-    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable,SkillInstance instance)
+
+    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable, SkillInstance instance)
     {
         if (skillType == 0) return; // スキル未設定行をスキップ
 
@@ -172,7 +172,7 @@ public class SkillExecutor : MonoBehaviour
                 Debug.Log("[SkillExecutor.ApplyEffectAmount]Called DoubleJump");
                 if (playerController == null)
                     playerController = FindObjectOfType<PlayerController>();
-                ExecuteDoubleJump(skillData,parameterBase);
+                ExecuteDoubleJump(skillData, parameterBase);
                 break;
 
             case SkillType.StepBackAttack:
@@ -186,27 +186,39 @@ public class SkillExecutor : MonoBehaviour
                 break;
 
             case SkillType.DrainAttack:
-                // 攻撃スキルとして処理される（ヒット判定も出る）
-                // 自分への回復処理だけここで行う
-
-                if (instance == null || instance.Caster == null)
                 {
-                    Debug.LogWarning("[DrainAttack] instanceまたはcasterがnullです。");
+                    Debug.Log("[SkillExecutor.ApplyEffectAmount] DrainAttack 発動開始");
+
+                    if (damageable == null)
+                    {
+                        Debug.LogWarning("[DrainAttack] Damageable が null です。");
+                        return;
+                    }
+
+                    // ① 通常攻撃と同じダメージ計算
+                    int damage = skill.EffectAmount001;
+                    damageable.TakeDamage(damage);
+
+                    // ② ドレイン割合
+                    float drainRatio = skill.EffectAmount002 / 100f; // 例: 50で50%
+                    float randomFactor = UnityEngine.Random.Range(0.97f, 1.03f);
+
+                    // ③ 回復量計算
+                    int healAmount = Mathf.RoundToInt(damage * drainRatio * randomFactor);
+
+                    // ④ キャスターを回復
+                    if (parameterBase != null)
+                    {
+                        parameterBase.Heal(healAmount);
+                        Debug.Log($"[HPDrain] {damage} ダメージ → {healAmount} 回復");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[HPDrain] parameterBase が null です。");
+                    }
                     break;
+
                 }
-
-                var caster = instance.Caster;
-
-                float randomFactor = UnityEngine.Random.Range(0.97f, 1.03f);
-                float ratio = skill.EffectAmount002 / 100f;  // 吸収割合（例：50なら50%）
-                int baseValue = skill.EffectAmount001;       // ダメージ量
-
-                int healAmount = Mathf.RoundToInt(baseValue * ratio * randomFactor);
-
-                caster.Heal(healAmount);
-                Debug.Log($"[DrainAttack] {caster.name} が {healAmount} 回復しました。");
-                break;
-
         }
     }
     private void ExecuteStepBackAttack(SkillData skill, ParameterBase caster, SkillInstance instance)

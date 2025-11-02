@@ -11,6 +11,7 @@ public class SkillHitDetector : MonoBehaviour
     [Header("位置・参照")]
     public Transform ModelRoot;
 
+
     private void Start()
     {
         // ModelRoot が未設定ならログを出して止める
@@ -24,9 +25,22 @@ public class SkillHitDetector : MonoBehaviour
         HitboxGenerator(ModelRoot);
     }
 
-    public void PerformHitDetection(SkillInstance instance, Transform ModelRoot)
+public void PerformHitDetection(SkillInstance instance, Transform origin)
     {
+        GameObject hitbox = new GameObject("HitBox");
+        hitbox.transform.SetParent(origin, false);
+        hitbox.transform.position = origin.position;
+
+        var collider = hitbox.AddComponent<BoxCollider2D>();
+        collider.isTrigger = true;
+
+        var receiver = hitbox.AddComponent<HitboxEventReceiver>();
+        receiver.Initialize(instance.Caster.GetComponent<SkillExecutor>()); // ←ここ重要！
+
+        Destroy(hitbox, 0.3f);
         Debug.Log("[SkillHitDetector.PerformHitDetection]Called PerformHitDetection");
+        Debug.Log($"[PerformHitDetection] HitBox生成完了 at {hitbox.transform.position}");
+
         // null チェック修正（= → ==）
         if (ModelRoot == null)
         {
@@ -141,27 +155,53 @@ public void HitboxTransformSetter(Transform originTransform)
 public class HitboxEventReceiver : MonoBehaviour
 {
     public SkillExecutor executor;
+    public FactionType attackerFaction;
+    private Collider2D col;
 
-    void OnTriggerEnter2D(Collider2D other)
+    public void Initialize(SkillExecutor owner)
     {
-        if (!other.CompareTag("Enemy")) return;
-
-        var executor = GetComponentInParent<SkillExecutor>();
+        executor = owner;
+    }
+    private void OnTriggerEnter2D(Collider2D other)
+    {
         if (executor == null)
         {
-            Debug.LogWarning("[HitboxEventReceiver] SkillExecutorが見つかりません。親参照が切れています。");
+            Debug.LogWarning("[HitboxEventReceiver] executorがnullです。Initializeされていません。");
             return;
         }
 
-        ParameterBase targetParam = other.GetComponent<ParameterBase>();
+        // 自分自身は無視
+        if (other.gameObject == executor.gameObject)
+        {
+            Debug.Log("[HitboxEventReceiver] 自分自身を無視しました。");
+            return;
+        }
+
+        // 攻撃者と同じFactionを弾く（ただし片方が未設定ならスキップ）
+        var attackerFaction = executor.GetComponent<FactionIdentifier>()?.faction ?? FactionType.Neutral;
+        var targetFaction = other.GetComponent<FactionIdentifier>()?.faction ?? FactionType.Unknown;
+
+        if (attackerFaction != FactionType.Unknown && targetFaction != FactionType.Unknown)
+        {
+            if (attackerFaction == targetFaction)
+            {
+                Debug.Log($"[HitboxEventReceiver] 同一Faction ({attackerFaction}) のため無効化");
+                return;
+            }
+        }
+
+        // ParameterBaseを持つ相手のみ有効
+        var targetParam = other.GetComponent<ParameterBase>();
         if (targetParam == null)
         {
-            Debug.LogWarning("[HitboxEventReceiver] ParameterBaseが敵に存在しません。");
+            Debug.Log("[HitboxEventReceiver] ParameterBaseが見つからないため無視");
             return;
         }
 
-        executor.OnHitEnemy(targetParam); // ← SkillExecutor側の処理に飛ばす
+        executor.OnHitEnemy(targetParam);
+        Debug.Log($"[HitboxEventReceiver] {other.name} にヒットしました！");
     }
+
 
     public void PerformStepBackHit(SkillInstance instance, Transform origin)
     {

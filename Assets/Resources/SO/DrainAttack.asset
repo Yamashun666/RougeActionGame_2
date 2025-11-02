@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DrainAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
   SkillName: 
-  GroupCode: 
-  LevelCode: 
+  GroupCode: 0007
+  LevelCode: 0007_01
   LevelUPSkillCode: 
   CoolTime: 0
   Rarity: 0
