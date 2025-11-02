@@ -25,7 +25,7 @@ public class SkillHitDetector : MonoBehaviour
         HitboxGenerator(ModelRoot);
     }
 
-public void PerformHitDetection(SkillInstance instance, Transform origin)
+    public void PerformHitDetection(SkillInstance instance, Transform origin)
     {
         GameObject hitbox = new GameObject("HitBox");
         hitbox.transform.SetParent(origin, false);
@@ -59,47 +59,34 @@ public void PerformHitDetection(SkillInstance instance, Transform origin)
     /// <summary>
     /// モデルの子として当たり判定を生成
     /// </summary>
-public void HitboxTransformSetter(Transform originTransform)
-{
-    if (originTransform == null)
+    public void HitboxTransformSetter(Transform originTransform)
     {
-        Debug.LogWarning("[SkillHitDetector] originTransformがnullのためModelRootを使用します。");
-        originTransform = ModelRoot;
+        if (originTransform == null)
+        {
+            Debug.LogError("[SkillHitDetector] ModelRootが設定されていません。");
+            return;
+        }
+
+        // 既にhitboxが存在しているか確認
+        if (hitbox == null)
+        {
+            hitbox = new GameObject("HitBox");
+            hitbox.transform.SetParent(originTransform, false);
+            hitbox.transform.localPosition = Vector3.zero;
+
+            // ColliderとRigidbodyを追加
+            var col = hitbox.AddComponent<BoxCollider2D>();
+            col.isTrigger = true;
+            var rb = hitbox.AddComponent<Rigidbody2D>();
+            rb.gravityScale = 0;
+            rb.isKinematic = true;
+
+            hitbox.AddComponent<HitboxEventReceiver>().Initialize(GetComponent<SkillExecutor>());
+
+            Debug.Log("[SkillHitDetector] 新規HitBoxを生成しました。");
+        }
     }
 
-    if (hitbox == null || hitbox.Equals(null))
-    {
-        Debug.LogError("[SkillHitDetector] hitboxがnullのままです。生成されていません。");
-        return;
-    }
-
-    // ここでデバッグログを追加
-    Debug.Log($"[DEBUG] HitboxTransformSetter実行開始 - hitbox={hitbox.name} active={hitbox.activeSelf}");
-
-    hitbox.transform.localPosition = Vector3.zero;
-    hitbox.transform.localRotation = Quaternion.identity;
-    hitbox.transform.localScale = new Vector3(2f, 3f, 1f);
-
-    Rigidbody2D rb = hitbox.GetComponent<Rigidbody2D>();
-    if (rb == null)
-    {
-        Debug.LogWarning("[SkillHitDetector] Rigidbody2D が見つからなかったので追加します。");
-        rb = hitbox.AddComponent<Rigidbody2D>();
-        rb.gravityScale = 0;
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-    }
-
-    BoxCollider2D col = hitbox.GetComponent<BoxCollider2D>();
-    if (col == null)
-    {
-        Debug.LogWarning("[SkillHitDetector] BoxCollider2D が見つからなかったので追加します。");
-        col = hitbox.AddComponent<BoxCollider2D>();
-        col.size = new Vector2(2f, 3f);
-        col.isTrigger = true;
-    }
-
-    Debug.Log("[DEBUG] HitboxTransformSetter完了");
-}
     public void HitboxGenerator(Transform originTransform)
     {
         hitbox = new GameObject("HitBox");
@@ -129,9 +116,13 @@ public void HitboxTransformSetter(Transform originTransform)
     }
 
     // 🔹 攻撃スキル発動時に呼ぶ関数
-    public void ActivateHitbox(float duration = 0.3f)
+    public void ActivateHitbox(float duration)
     {
-        if (hitbox == null) return;
+        if (hitbox == null)
+        {
+            Debug.LogError("[SkillHitDetector] Hitboxが存在しません。");
+            return;
+        }
 
         hitbox.SetActive(true);
         StartCoroutine(DisableAfterDelay(duration));
@@ -140,7 +131,8 @@ public void HitboxTransformSetter(Transform originTransform)
     private IEnumerator DisableAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-        if (hitbox != null) hitbox.SetActive(false);
+        if (hitbox != null)
+        hitbox.SetActive(false);
     }
     public void InitializeLayerMask()
     {
@@ -199,6 +191,7 @@ public class HitboxEventReceiver : MonoBehaviour
         }
 
         executor.OnHitEnemy(targetParam);
+        Destroy(gameObject); // ヒットした瞬間にHitBoxを破壊
         Debug.Log($"[HitboxEventReceiver] {other.name} にヒットしました！");
     }
 

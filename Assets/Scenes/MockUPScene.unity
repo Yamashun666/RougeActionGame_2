@@ -941,7 +941,7 @@ PrefabInstance:
     - target: {fileID: 2478598881391213043, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 4.45
       objectReference: {fileID: 0}
     - target: {fileID: 2478598881391213043, guid: 909ba97d1692b994ebfcf271f903b6da,
         type: 3}
@@ -992,6 +992,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TestEnemy
+      objectReference: {fileID: 0}
+    - target: {fileID: 4408804690441070032, guid: 909ba97d1692b994ebfcf271f903b6da,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1282,6 +1287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneChange
   defaultSceneName: LobbyScene
   button: {fileID: 0}
+  skillUIManager: {fileID: 1774295983}
 --- !u!4 &1109726174
 Transform:
   m_ObjectHideFlags: 0
@@ -2189,6 +2195,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1732261253501711126, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
+        type: 3}
+      propertyPath: m_IsTrigger
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6278645144663655479, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}
       propertyPath: sceneChange
@@ -2202,7 +2213,7 @@ PrefabInstance:
     - target: {fileID: 8120728310206931793, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -9.46
       objectReference: {fileID: 0}
     - target: {fileID: 8120728310206931793, guid: 4be8bc6cd197b444294ae2a6bb24f81d,
         type: 3}

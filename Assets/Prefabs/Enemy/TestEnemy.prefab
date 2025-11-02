@@ -14793,6 +14793,7 @@ MonoBehaviour:
   attackRange: 5
   stopDistance: 1
   thinkInterval: 0.3
+  attackCooldown: 1
 --- !u!114 &2002078421088384671
 MonoBehaviour:
   m_ObjectHideFlags: 0

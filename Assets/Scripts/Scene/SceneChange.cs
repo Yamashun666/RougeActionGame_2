@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -7,7 +8,6 @@ public class SceneChange : MonoBehaviour
     [Header("設定")]
     [SerializeField] private string defaultSceneName = "LobbyScene"; // ← Inspectorから設定
     [SerializeField] private Button button;
-
     private bool isClicked = false;
     private static SceneChange instance;
     public static SceneChange Instance => instance;
