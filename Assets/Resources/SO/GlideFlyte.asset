@@ -21,7 +21,7 @@ MonoBehaviour:
   SkillEnhancementTable: 
   effectDuration: 0
   HitShapeType: 0
-  SkillType001: 8
+  SkillType001: 7
   SkillType002: 0
   SkillType003: 0
   SkillType004: 0

@@ -10,25 +10,25 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 0}
-  m_Name: RangedMagic
+  m_Name: DrainAttack
   m_EditorClassIdentifier: Assembly-CSharp::SkillData
-  SkillName: RangedMagic
-  GroupCode: 0006
-  LevelCode: 0006_01
+  SkillName: 
+  GroupCode: 
+  LevelCode: 
   LevelUPSkillCode: 
   CoolTime: 0
-  Rarity: 1
+  Rarity: 0
   SkillEnhancementTable: 
   effectDuration: 0
   HitShapeType: 0
-  SkillType001: 8
+  SkillType001: 9
   SkillType002: 0
   SkillType003: 0
   SkillType004: 0
   Type: 0
-  EffectAmount001: 20
-  EffectAmount002: 25
-  EffectAmount003: 1
+  EffectAmount001: 50
+  EffectAmount002: 100
+  EffectAmount003: 0
   UseSkillSFX001: 
   DelayUseSkillSFX001: 0
   UseSkillSFX002: 
@@ -41,5 +41,4 @@ MonoBehaviour:
   StepBackDistance: 2.5
   StepBackSpeed: 8
   IsUnique: 0
-  ProjectilePrefab: {fileID: 8076620975919597891, guid: 5143976795c2e4f43972e3a8204d3359,
-    type: 3}
+  ProjectilePrefab: {fileID: 0}

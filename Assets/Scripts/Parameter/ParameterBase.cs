@@ -79,6 +79,7 @@ public class ParameterBase : MonoBehaviour
     }
     public void Heal(int amount)
     {
+        Debug.Log("[ParameterBase.Heal]Heal Called");
         if (amount <= 0) return;
 
         int newHP = CurrentHP + amount;
@@ -91,6 +92,7 @@ public class ParameterBase : MonoBehaviour
         {
             CurrentHP = newHP;
         }
+        Debug.Log("[ParameterBase.Heal]PlayerをHealしました。現在のプレイヤーHPは" + CurrentHP + "ポイントです");
     }
     // ParameterBase.cs
     public void TakeDamage(int damage)
