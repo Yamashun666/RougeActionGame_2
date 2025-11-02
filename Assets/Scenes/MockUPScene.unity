@@ -998,6 +998,16 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8603844652755504980, guid: 909ba97d1692b994ebfcf271f903b6da,
+        type: 3}
+      propertyPath: attackRange
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8603844652755504980, guid: 909ba97d1692b994ebfcf271f903b6da,
+        type: 3}
+      propertyPath: stopDistance
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1287,7 +1297,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SceneChange
   defaultSceneName: LobbyScene
   button: {fileID: 0}
-  skillUIManager: {fileID: 1774295983}
 --- !u!4 &1109726174
 Transform:
   m_ObjectHideFlags: 0
