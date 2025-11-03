@@ -260,31 +260,48 @@ public class SkillExecutor : MonoBehaviour
     }
     private void ExecuteProjectile(SkillData skill, ParameterBase caster)
     {
+        Debug.Log("[ExecuteProjectile] 呼ばれた");
+
         if (skill == null || skill.ProjectilePrefab == null)
+        {
+            Debug.LogError("[ExecuteProjectile] skill または projectilePrefab が null");
             return;
+        }
 
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player == null || player.magicOrigin == null)
+        {
+            Debug.LogError("[ExecuteProjectile] PlayerController または magicOrigin が null");
             return;
+        }
 
-        // マウス位置からワールド座標を取得
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-        Vector3 dir3 = (mouseWorldPos - player.magicOrigin.position);
-        dir3.z = 0f;
-        Vector2 shootDir = dir3.normalized;
+        // 🖱️ マウス座標をスクリーン→ワールドへ変換
+        Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+        mouseWorldPos.z = 0f;
 
-        // 弾生成
+        // 🎯 発射方向を計算
+        Vector2 direction = (mouseWorldPos - player.magicOrigin.position).normalized;
+        Debug.Log($"[ExecuteProjectile] 発射方向ベクトル: {direction}");
+
+        // 🧩 Projectile生成
         GameObject projectile = Instantiate(skill.ProjectilePrefab, player.magicOrigin.position, Quaternion.identity);
 
         var proj = projectile.GetComponent<MagicProjectile>();
-        if (proj != null)
-            proj.Initialize(skill, caster, 1f);
+        if (proj == null)
+        {
+            Debug.LogError("[ExecuteProjectile] MagicProjectile スクリプトがPrefabにアタッチされていません！");
+            return;
+        }
 
-        Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
-        if (rb != null)
-            rb.AddForce(shootDir * skill.EffectAmount001, ForceMode2D.Impulse);
+        // 初期化（directionをベクトルで渡す）
+        proj.Initialize(skill, caster, direction);
 
-        Debug.Log($"[ExecuteProjectile] {skill.SkillName} を {shootDir} 方向へ発射しました。");
+        // 弾の見た目を回転（向いてる方向に合わせる）
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        projectile.transform.rotation = Quaternion.Euler(0, 0, angle);
+
+        Debug.Log("[ExecuteProjectile] マウス方向に発射完了");
     }
 
     private bool IsAttackSkill(SkillData skill)
