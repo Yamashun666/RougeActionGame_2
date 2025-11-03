@@ -1,8 +1,6 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Game.SkillSystem;
+using UnityEngine.InputSystem;
 
 public class SkillExecutor : MonoBehaviour
 {
@@ -262,48 +260,33 @@ public class SkillExecutor : MonoBehaviour
     }
     private void ExecuteProjectile(SkillData skill, ParameterBase caster)
     {
-        Debug.Log("[ExecuteProjectile] 呼ばれた");
-
-        if (skill == null)
-        {
-            Debug.LogError("[ExecuteProjectile] skill が null");
+        if (skill == null || skill.ProjectilePrefab == null)
             return;
-        }
-
-        if (skill.ProjectilePrefab == null)
-        {
-            Debug.LogError("[ExecuteProjectile] ProjectilePrefab が null");
-            return;
-        }
 
         PlayerController player = FindObjectOfType<PlayerController>();
-        if (player == null)
-        {
-            Debug.LogError("[ExecuteProjectile] PlayerController が null");
+        if (player == null || player.magicOrigin == null)
             return;
-        }
 
-        Debug.Log($"[ExecuteProjectile] player 取得成功: {player.name}");
+        // マウス位置からワールド座標を取得
+        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector3 dir3 = (mouseWorldPos - player.magicOrigin.position);
+        dir3.z = 0f;
+        Vector2 shootDir = dir3.normalized;
 
-        if (player.magicOrigin == null)
-        {
-            Debug.LogError("[ExecuteProjectile] magicOrigin が null");
-            return;
-        }
-
+        // 弾生成
         GameObject projectile = Instantiate(skill.ProjectilePrefab, player.magicOrigin.position, Quaternion.identity);
-        Debug.Log($"[ExecuteProjectile] Projectile生成: {projectile.name}");
 
         var proj = projectile.GetComponent<MagicProjectile>();
-        if (proj == null)
-        {
-            Debug.LogError("[ExecuteProjectile] MagicProjectile スクリプトがPrefabにアタッチされていません！");
-            return;
-        }
+        if (proj != null)
+            proj.Initialize(skill, caster, 1f);
 
-        proj.Initialize(skill, caster, Mathf.Sign(player.transform.localScale.x));
-        Debug.Log("[ExecuteProjectile] Initialize完了");
+        Rigidbody2D rb = projectile.GetComponent<Rigidbody2D>();
+        if (rb != null)
+            rb.AddForce(shootDir * skill.EffectAmount001, ForceMode2D.Impulse);
+
+        Debug.Log($"[ExecuteProjectile] {skill.SkillName} を {shootDir} 方向へ発射しました。");
     }
+
     private bool IsAttackSkill(SkillData skill)
     {
         return skill.SkillType001 == (int)SkillType.Attack ||

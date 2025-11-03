@@ -32,10 +32,12 @@ public class PlayerController : MonoBehaviour
     public bool hasJetBoost = false;
     public SkillData jetBoostSkill;      // JetBoost用のSkillData参照
     public Transform magicOrigin;
+    private Animator animator;
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         playerParam = GetComponent<ParameterBase>();
+        animator = GetComponent<Animator>();
 
         inputActions = new PlayerInputActions();
         inputActions.Player.Enable();
@@ -54,38 +56,58 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        //UnityEngine.Debug.Log(isGrounded);
         HandleMovement();
         HandleJump();
-        /// DoubleJumpが完全には出来ておらず、Input周りとの調整・修正が必要なので一旦コメントアウト
-        ///if (Input.GetButtonDown("Jump") && canDoubleJump && !hasUsedDoubleJump && !isGrounded)
-        {
-            ///DoubleJump();
-        }
+        UpdateAnimator();
     }
 
     void HandleMovement()
     {
-        if (isStepBackActive) return;  // ← この1行で「ステップ中は入力無視」
+        if (isStepBackActive) return;
 
         if (moveInput.x != 0)
         {
+            // 進行方向に向きを反転
+            Vector3 scale = transform.localScale;
+            scale.x = Mathf.Sign(moveInput.x) * Mathf.Abs(scale.x);
+            transform.localScale = scale;
+
             Vector2 moveForce = new Vector2(moveInput.x * moveSpeed, 0f);
             rb.AddForce(moveForce, ForceMode2D.Force);
 
-            // 最大速度制限
             if (Mathf.Abs(rb.linearVelocity.x) > moveSpeed)
                 rb.linearVelocity = new Vector2(Mathf.Sign(rb.linearVelocity.x) * moveSpeed, rb.linearVelocity.y);
         }
         else
         {
-            // 減速処理
             float decelFactor = 0.85f;
             rb.linearVelocity = new Vector2(rb.linearVelocity.x * decelFactor, rb.linearVelocity.y);
             if (Mathf.Abs(rb.linearVelocity.x) < 0.1f)
                 rb.linearVelocity = new Vector2(0, rb.linearVelocity.y);
         }
     }
+    private void UpdateAnimator()
+    {
+        if (animator == null) return;
+
+        float speed = Mathf.Abs(rb.linearVelocity.x);
+        animator.SetFloat("Speed", speed);
+        animator.SetBool("IsGrounded", isGrounded);
+
+        // ジャンプ or 落下状態
+        if (!isGrounded)
+        {
+            if (rb.linearVelocity.y > 0.1f)
+                animator.SetBool("IsJumping", true);
+            else
+                animator.SetBool("IsJumping", false);
+        }
+        else
+        {
+            animator.SetBool("IsJumping", false);
+        }
+    }
+
     public void StartJetBoost(float thrustPower, float gravityScale, float duration)
     {
         if (isJetBoosting) return;     // 多重起動防止
@@ -255,6 +277,8 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
+        skillExecutor.ExecuteSkill(skill, playerParam, playerParam);
+        animator?.SetTrigger("Attack");
         skillExecutor.ExecuteSkill(skill, playerParam, playerParam);
         Debug.Log("[HandleAttack] 攻撃スキル発動中");
     }

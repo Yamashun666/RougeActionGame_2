@@ -14784,16 +14784,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0676ad0453e902945b40473830809bcd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI_Melee
-  rb: {fileID: 0}
-  parameter: {fileID: 0}
-  skillExecutor: {fileID: 0}
-  player: {fileID: 0}
   moveSpeed: 3
   detectionRange: 15
   attackRange: 5
   stopDistance: 1
-  thinkInterval: 0.3
   attackCooldown: 1
+  attackSkill: {fileID: 0}
 --- !u!114 &2002078421088384671
 MonoBehaviour:
   m_ObjectHideFlags: 0
