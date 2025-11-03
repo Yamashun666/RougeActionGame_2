@@ -40,12 +40,22 @@ public class PlayerInventory : MonoBehaviour
             nearbyDrop = null;
             canInteract = false;
         }
+            if (nearbyDrop != null)
+        Debug.Log($"[Update] nearbyDrop = {nearbyDrop.name}, canInteract = {canInteract}");
+        else
+            Debug.Log("[Update] nearbyDrop = null");
+
+        if (canInteract && nearbyDrop != null && Input.GetKeyDown(KeyCode.F))
+        {
+            SkillData skill = nearbyDrop.skillData;
+        }
 
         // 🔴 Esc押下 → ドラッグモード解除
         if (isDragging && Input.GetKeyDown(KeyCode.Escape))
         {
             CancelDragMode();
         }
+
     }
     public void AddItem(string itemName, int value)
     {
@@ -58,19 +68,7 @@ public class PlayerInventory : MonoBehaviour
 
         Debug.Log($"🧍 コイン獲得！ 合計: {coinCount}");
     }
-    private void StartDragSkillOrb(DroppedItem drop, SkillData skill)
-    {
-        Debug.Log($"🧠 スキル [{skill.SkillName}] ドラッグ開始");
 
-        // TODO: ここで UI の「ドラッグ中状態」に遷移させる
-        // 例: SkillOrbUI.BeginDrag(skill, drop.defaultIcon);
-
-        // 暫定的にそのまま取得処理
-        skillManager.AddSkill(skill);
-        Debug.Log($"🧠 スキル [{skill.SkillName}] を取得しました！");
-
-        Destroy(drop.gameObject);
-    }
     private void StartDragMode(DroppedItem drop)
     {
         if (isDragging) return;
@@ -99,7 +97,7 @@ public class PlayerInventory : MonoBehaviour
 
         SkillOrbDragController.Instance.BeginDrag(drop.skillData, drop);
     }
-    
+
         private void HighlightSkillOrb(DroppedItem drop, bool enable)
     {
         if (drop == null) return;
@@ -110,7 +108,7 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    private void CancelDragMode()
+    public void CancelDragMode()
     {
         if (!isDragging) return;
 
@@ -119,6 +117,19 @@ public class PlayerInventory : MonoBehaviour
         HighlightSkillOrb(nearbyDrop, false);
 
         // TODO: 今後スキル説明UIやドラッグ用カーソルのリセット処理を追加
+    }
+    public void RegisterNearbyItem(DroppedItem drop)
+    {
+        if (drop == null)
+        {
+            Debug.LogError("[PlayerInventory] RegisterNearbyItem に null が渡された");
+            return;
+        }
+        Debug.Log($"[PlayerInventory.RegisterNearbyItem] 呼び出された! drop={(drop != null ? drop.name : "null")}, this={gameObject.name}");
+        nearbyDrop = drop;
+        canInteract = true;
+
+        Debug.Log($"[PlayerInventory] {drop.name} に接近。Fキーで拾えます。");
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -130,41 +141,36 @@ public class PlayerInventory : MonoBehaviour
         canInteract = true;
         Debug.Log($"[PlayerInventory] {drop.name} に接近。Fキーで拾えます。");
     }
-    private void OnTriggerExit2D(Collider2D other)
+
+    public void UnregisterNearbyItem(DroppedItem item)
     {
-        if (other.GetComponent<DroppedItem>() == nearbyDrop)
-        {
-            nearbyDrop = null;
-            canInteract = false;
-        }
+        //if (nearbyDrop == item) nearbyDrop = null;
+        // UI を消す
     }
-    private void CollectDroppedItem(DroppedItem droppedItem)
+
+    private void PickUp(DroppedItem item)
     {
-        if (droppedItem == null)
+        if (item == null || item.skillData == null)
         {
-            Debug.LogWarning("[PlayerInventory] DroppedItem が null です。");
+            Debug.LogWarning("[PlayerInventory] PickUp 失敗: item or skillData が null");
             return;
         }
 
-        // ① インベントリに追加
-        // 　もし inventoryManager などの管理クラスがあればここで呼ぶ
-        if (inventoryManager != null)
+        // 1) スキル取得（所持一覧 or UI への反映）
+        var skillMgr = GetComponent<SkillManager>();
+        if (skillMgr != null)
         {
-            inventoryManager.AddItem(droppedItem);
+            skillMgr.AddSkill(item.skillData);
         }
 
-        // ② スキルドロップの場合：SkillManager に登録
-        if (droppedItem.skillData != null)
-        {
-            Debug.Log($"[PlayerInventory] スキル {droppedItem.skillData.SkillName} を獲得！");
-            // SkillManager.Instance.AddSkill(droppedItem.skillData);
-        }
+        // 2) スロットUIに自動割り当てしたいならここで呼ぶ
+        // FindAnyObjectByType<SkillUIManager>()?.AssignToFirstEmptySlot(item.skillData);
 
-        // ③ サウンド or エフェクト再生
-        // AudioManager.Play("ItemGet"); // ←任意
+        // 3) オーブを消す
+        Destroy(item.gameObject);
+        nearbyDrop = null;
 
-        // ④ ゲーム上のアイテムを削除
-        Destroy(droppedItem.gameObject);
+        Debug.Log($"[PlayerInventory] [{item.skillData.SkillName}] を取得しました！");
     }
 }
 

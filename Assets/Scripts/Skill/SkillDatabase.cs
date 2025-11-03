@@ -29,6 +29,10 @@ public class SkillDatabase : ScriptableObject
             Debug.LogError("[SkillDatabase] SkillDatabase.asset が Resources に存在しません！");
         }
     }
+    public IReadOnlyList<SkillData> GetAllSkills()
+    {
+        return skills;
+    }
     public SkillData GetRandomSkillByRarity(int rarity, bool excludeUnique = true)
     {
         List<SkillData> candidates = new List<SkillData>();

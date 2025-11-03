@@ -21,6 +21,10 @@ MonoBehaviour:
   SkillEnhancementTable: 
   effectDuration: 5
   HitShapeType: 0
+  ownedSkills: []
+  DropPrefab: {fileID: 1873596867619418685, guid: 04b8633f288475249a65a3801616f0bf,
+    type: 3}
+  OrbPrefab: {fileID: 0}
   SkillType001: 5
   SkillType002: 0
   SkillType003: 0
@@ -37,5 +41,9 @@ MonoBehaviour:
   DelayUseSkillVFX001: 0
   UseSkillVFX002: 
   DelayUseSkillVFX002: 0
-  SkillIcon: 
+  SkillIcon: Assets/ThirdParty/CorgiEngine/Demos/Minimal/Sprites/Props/MinimalItemsIcons.png
+  StepBackDistance: 2.5
+  StepBackSpeed: 8
   IsUnique: 0
+  ProjectilePrefab: {fileID: 0}
+  skills: []

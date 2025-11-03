@@ -21,6 +21,10 @@ MonoBehaviour:
   SkillEnhancementTable: 
   effectDuration: 0
   HitShapeType: 0
+  ownedSkills: []
+  DropPrefab: {fileID: 421770307123301303, guid: 877818d44fa5bd54daa13afcdd3e7f32,
+    type: 3}
+  OrbPrefab: {fileID: 0}
   SkillType001: 9
   SkillType002: 0
   SkillType003: 0
@@ -37,8 +41,9 @@ MonoBehaviour:
   DelayUseSkillVFX001: 0
   UseSkillVFX002: 
   DelayUseSkillVFX002: 0
-  SkillIcon: 
+  SkillIcon: Assets/ThirdParty/CorgiEngine/Demos/Corgi2D/Sprites/Items/weapon-upgrade.png
   StepBackDistance: 2.5
   StepBackSpeed: 8
   IsUnique: 0
   ProjectilePrefab: {fileID: 0}
+  skills: []

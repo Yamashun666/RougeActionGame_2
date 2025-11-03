@@ -13,8 +13,7 @@ public class SkillOrbDragController : MonoBehaviour
     public Image dragIconImage;
 
     [HideInInspector]private bool isDragging = false;
-    private SkillData currentSkill;
-    private DroppedItem currentDrop;
+    private PlayerInventory playerInventory;
     private SkillData draggedSkill;                // 現在ドラッグ中のスキル
     private DroppedItem originDroppedItem;         // 元のドロップオブジェクト（スロットまたはフィールド）
     public Sprite cachedIcon; // ★追加：破棄前にアイコンだけキャッシュ
@@ -156,6 +155,7 @@ public class SkillOrbDragController : MonoBehaviour
                 slot.SetSkill(draggedSkill, originDroppedItem, cachedIcon);
                 Debug.Log($"[SkillOrbDragController] スロット {slot.slotIndex} に {draggedSkill.SkillName} を登録しました。");
                 registered = true;
+
                 break;
             }
         }
@@ -171,7 +171,6 @@ public class SkillOrbDragController : MonoBehaviour
             Debug.Log($"[SkillOrbDragController] {originDroppedItem.name} を削除");
             Destroy(originDroppedItem.gameObject);
         }
-
         StopDragVisuals();
     }
 

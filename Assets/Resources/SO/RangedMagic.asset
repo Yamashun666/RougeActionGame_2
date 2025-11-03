@@ -21,6 +21,10 @@ MonoBehaviour:
   SkillEnhancementTable: 
   effectDuration: 0
   HitShapeType: 0
+  ownedSkills: []
+  DropPrefab: {fileID: 8076620975919597891, guid: 5143976795c2e4f43972e3a8204d3359,
+    type: 3}
+  OrbPrefab: {fileID: 0}
   SkillType001: 8
   SkillType002: 0
   SkillType003: 0
@@ -37,9 +41,10 @@ MonoBehaviour:
   DelayUseSkillVFX001: 0
   UseSkillVFX002: 
   DelayUseSkillVFX002: 0
-  SkillIcon: 
+  SkillIcon: RetroFireball
   StepBackDistance: 2.5
   StepBackSpeed: 8
   IsUnique: 0
   ProjectilePrefab: {fileID: 8076620975919597891, guid: 5143976795c2e4f43972e3a8204d3359,
     type: 3}
+  skills: []

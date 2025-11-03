@@ -881,6 +881,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3126643850714509072}
+  - component: {fileID: 4724280181109424147}
   m_Layer: 0
   m_Name: BackGround
   m_TagString: Untagged
@@ -908,6 +909,18 @@ Transform:
   - {fileID: 1000528647142294274}
   m_Father: {fileID: 7086085215428078748}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4724280181109424147
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5252017663926787425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc5b1c6a212493b43856dc56eb7ac7a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SpriteFixedFacing
 --- !u!1 &5259910698251966236
 GameObject:
   m_ObjectHideFlags: 0

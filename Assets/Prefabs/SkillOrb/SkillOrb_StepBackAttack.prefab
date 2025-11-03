@@ -170,9 +170,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::DroppedItem
   iconRenderer: {fileID: 0}
   commonColor: {r: 1, g: 1, b: 1, a: 1}
+  unCommonColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   rareColor: {r: 0, g: 1, b: 1, a: 1}
   epicColor: {r: 1, g: 0, b: 1, a: 1}
   legendaryColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   skillData: {fileID: 11400000, guid: d9fa8c4e896fb3b42a1128fad0bb29b7, type: 2}
   defaultIcon: {fileID: 21300026, guid: f3f4293ccdddd34468f58745d608416e, type: 3}
+  IconRenderer: {fileID: 0}
   skillLevelCode: 0004_01

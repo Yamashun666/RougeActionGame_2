@@ -15,7 +15,16 @@ MonoBehaviour:
   SkillName: GlideAttack
   GroupCode: 0002
   LevelCode: 0002_01
+  LevelUPSkillCode: 
+  CoolTime: 5
   Rarity: 2
+  SkillEnhancementTable: 
+  effectDuration: 0
+  HitShapeType: 0
+  ownedSkills: []
+  DropPrefab: {fileID: 5487899111303341641, guid: 0192aa2628873d848927f25eb58cc0c7,
+    type: 3}
+  OrbPrefab: {fileID: 0}
   SkillType001: 1
   SkillType002: 0
   SkillType003: 0
@@ -24,8 +33,6 @@ MonoBehaviour:
   EffectAmount001: 80
   EffectAmount002: 0
   EffectAmount003: 0
-  CoolTime: 5
-  LevelUP_LevelCode: 0
   UseSkillSFX001: 
   DelayUseSkillSFX001: 0
   UseSkillSFX002: 
@@ -34,8 +41,9 @@ MonoBehaviour:
   DelayUseSkillVFX001: 0
   UseSkillVFX002: 
   DelayUseSkillVFX002: 0
-  SkillEnhancementTable: 
-  SkillIcon: 
-  LevelUPSkillCode: 
-  HitShapeType: 0
+  SkillIcon: BulletsIcon
+  StepBackDistance: 2.5
+  StepBackSpeed: 8
   IsUnique: 0
+  ProjectilePrefab: {fileID: 0}
+  skills: []

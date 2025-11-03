@@ -1,5 +1,5 @@
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Game.SkillSystem;
 
@@ -29,7 +29,11 @@ public class SkillData : ScriptableObject
     public string SkillEnhancementTable;
     public float effectDuration;
     public HitShape HitShapeType;
+    public List<SkillData> ownedSkills = new List<SkillData>();
+    public GameObject DropPrefab; // このスキルをドロップした際のPrefab
 
+    [Header("ドロップ用Orb設定")]
+    public GameObject OrbPrefab;  // このスキル専用のOrb
     [Header("使用スキル効果の指定")]
     public int SkillType001;
     public int SkillType002;
@@ -58,6 +62,10 @@ public class SkillData : ScriptableObject
     public bool IsUnique = false;
     [Header("Projectile設定")]
     public GameObject ProjectilePrefab;
+    [Header("登録スキル一覧")]
+    [SerializeField] private List<SkillData> skills = new List<SkillData>();
+    
+
 }
 
 //////////////////////////////////////////////////////////
@@ -127,6 +135,17 @@ public class SkillManager : MonoBehaviour
             ownedSkills.Remove(skill);
             Debug.Log($"❌ スキル [{skill.SkillName}] を削除しました。");
         }
+    }
+    /// <summary>
+    /// 指定レアリティのスキルをランダムに返す
+    /// </summary>
+    public SkillData GetRandomSkillByRarity(int rarity)
+    {
+        var allSkills = SkillDatabase.Instance.GetAllSkills();
+        var list = allSkills.Where(s => s.Rarity == rarity).ToList();
+        if (list.Count == 0) return null;
+
+        return list[UnityEngine.Random.Range(0, list.Count)];
     }
 
 }

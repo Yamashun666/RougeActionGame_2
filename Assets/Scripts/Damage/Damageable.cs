@@ -28,6 +28,10 @@ public class Damageable : MonoBehaviour
             sceneChange?.ChangeScene(); // InspectorでSceneChangeを紐づけておく
             return; // Destroyしない（遷移でシーン全体破棄される）
         }
+            // スキルドロップ
+        var dropper = GetComponent<EnemyDropManager>();
+        if (dropper != null)
+            dropper.TryDrop();
 
         // 敵などの一般的な死亡処理
         GetComponent<DeathEffectHandler>()?.TriggerDeath();
