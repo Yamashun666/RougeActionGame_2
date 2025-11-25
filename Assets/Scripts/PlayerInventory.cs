@@ -43,7 +43,7 @@ public class PlayerInventory : MonoBehaviour
             if (nearbyDrop != null)
         Debug.Log($"[Update] nearbyDrop = {nearbyDrop.name}, canInteract = {canInteract}");
         else
-            Debug.Log("[Update] nearbyDrop = null");
+        /// Debug.Log("[Update] nearbyDrop = null");
 
         if (canInteract && nearbyDrop != null && Input.GetKeyDown(KeyCode.F))
         {

@@ -13,6 +13,9 @@ public abstract class EnemyAIController : MonoBehaviour
     public ParameterBase parameter;
     public SkillExecutor skillExecutor;
     public Transform player;
+    public float timer;
+    [Header("Static Data (ScriptableObject)")]
+    public EnemyMaster enemyMaster; // SO
 
     [Header("移動設定")]
     public float moveSpeed = 3f;
@@ -40,6 +43,11 @@ public abstract class EnemyAIController : MonoBehaviour
             return;
 
         Think();
+        Debug.Log(timer);
+    }
+    public void TimerSetter()
+    {
+        timer = parameter.CTReduction;
     }
 
     /// <summary>

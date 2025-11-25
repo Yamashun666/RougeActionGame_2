@@ -9,19 +9,20 @@ public class EnemyAI_Gambit : EnemyAIController
 {
     public EnemyGambitSet gambitSet;
     public float evaluateInterval = 0.5f;
-    private float timer;
 
     protected override void Think()
     {
-        timer += Time.deltaTime;
-        if (timer < evaluateInterval) return;
-        timer = 0f;
-
-        EvaluateGambits();
+        timer -= Time.deltaTime;
+        if(timer <= 0)
+        {
+            EvaluateGambits();
+            TimerSetter();
+        }
     }
 
     private void EvaluateGambits()
     {
+        Debug.Log("[EnemyGambitSet.EvaluateGambits]Called EvaluateGambits");
         if (gambitSet == null || gambitSet.gambits.Count == 0)
             return;
 
