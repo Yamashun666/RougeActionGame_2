@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 520124af6df8cb14aaa78b120fcc6b4d, type: 3}
-  m_Name: EnemyGambitSO_
+  m_Name: RangedMagic
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGambitSO
-  gambitName: CloseAttack
-  priority: 1000
+  gambitName: RangedMagic
+  priority: 1500
   flagNum: 2
   targetNum: 1
-  targetPoint: 3
-  callActionCode: 0001_01
+  targetPoint: 5
+  callActionCode: 0006_01
   note: 

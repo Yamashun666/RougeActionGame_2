@@ -14300,6 +14300,7 @@ GameObject:
   - component: {fileID: 778836020878614135}
   - component: {fileID: 8603844652755504980}
   - component: {fileID: 2002078421088384671}
+  - component: {fileID: 3917290683721874300}
   m_Layer: 6
   m_Name: TestEnemy
   m_TagString: Enemy
@@ -14770,7 +14771,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fec3ba250192b1f4ea0bbd509d3665d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SkillHitDetector
-  executor: {fileID: 7674948246645175283}
+  executor: {fileID: 0}
   ModelRoot: {fileID: 66744824599132380}
 --- !u!114 &8603844652755504980
 MonoBehaviour:
@@ -14786,8 +14787,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyAI_Melee
   moveSpeed: 3
   detectionRange: 15
-  attackRange: 5
-  stopDistance: 1
+  attackRange: 2
+  stopDistance: 0.5
   attackCooldown: 1
   attackSkill: {fileID: 0}
 --- !u!114 &2002078421088384671
@@ -14814,6 +14815,24 @@ MonoBehaviour:
   stopDistance: 1
   gambitSet: {fileID: 11400000, guid: ccc857f8c493528428a9bcf6de3aefb6, type: 2}
   evaluateInterval: 0.5
+--- !u!114 &3917290683721874300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3908439562483256480}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d84f81385400b24e8b68abe641bf806, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyDropManager
+  CommonDropRate: 0
+  UnCommonDropRate: 0
+  RareDropRate: 0
+  EpicDropRate: 1000
+  LegendaryDropRate: 0
+  dropOffset: {x: 0, y: 1}
 --- !u!1 &3951470978505148753
 GameObject:
   m_ObjectHideFlags: 0

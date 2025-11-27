@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e241e993a58fbe46ba890e89950ad22, type: 3}
+  m_Name: RangedMagicSkelton
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyGambitSet
+  gambits:
+  - {fileID: 11400000, guid: f0b5174260a7eb8429ad05698d90e455, type: 2}
+  - {fileID: 11400000, guid: 449eec44c0180bc44acb6dfbdb39253f, type: 2}
+  - {fileID: 11400000, guid: f391e2f17a847da46b46965730da3fab, type: 2}
