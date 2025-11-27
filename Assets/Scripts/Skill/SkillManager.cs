@@ -64,7 +64,7 @@ public class SkillData : ScriptableObject
     public GameObject ProjectilePrefab;
     [Header("登録スキル一覧")]
     [SerializeField] private List<SkillData> skills = new List<SkillData>();
-    
+
 
 }
 

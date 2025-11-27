@@ -21,7 +21,6 @@ public class DroppedItem : MonoBehaviour
     public SpriteRenderer IconRenderer;   // Orbの見た目
     public PlayerInventory inventory;
 
-
     [Header("内部データ")]
     public string skillLevelCode; // SkillDatabase内のLevelCode
     [Header("見た目/データ")]

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class SkillUIManager : MonoBehaviour
@@ -8,12 +9,14 @@ public class SkillUIManager : MonoBehaviour
     [Header("UIスロット（Q=0, W=1, E=2, R=3 の想定）")]
     public SkillSlotUI[] slots;
     public SkillExecutor executor;
-        [Header("プレイヤーのSkillExecutor")]
+    [Header("プレイヤーのSkillExecutor")]
     public SkillExecutor PlayerExecutor;
-
     [Header("プレイヤーのParameterBase（発動元）")]
     public ParameterBase playerParameter;
-
+    private float coolTimeQ;
+    private float coolTimeW;
+    private float coolTimeE;
+    private float coolTimeR;
 
     private void Awake()
     {
@@ -35,6 +38,8 @@ public class SkillUIManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W)) TryUseSkill(1);
         if (Input.GetKeyDown(KeyCode.E)) TryUseSkill(2);
         if (Input.GetKeyDown(KeyCode.R)) TryUseSkill(3);
+        Debug.Log(coolTimeW);
+        CTCounter();
     }
 
     /// <summary>
@@ -85,11 +90,64 @@ public class SkillUIManager : MonoBehaviour
         {
             Debug.Log("[SkillUIManager.TryUseSkill]ExecuteSkill()を使用しました");
         }
+
         // 実際に発動
-        executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+        if(index == 0)
+        {
+            if(coolTimeQ <= 0)
+            {
+                executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+            }
+        }
+        if(index == 1)
+        {
+            if(coolTimeW <= 0)
+            {
+                executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+            }
+        }
+        if(index == 2)
+        {
+            if(coolTimeE <= 0)
+            {
+                executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+            }
+        }
+        if(index == 3)
+        {
+            if(coolTimeR <= 0)
+            {
+                executor.ExecuteSkill(slot.assignedSkill, playerParameter,null);
+            }
+        }
+        CTSetter(index,slot);
     }
-
-
+    public void CTSetter(int index,SkillSlotUI slot)
+    {
+        if(index == 0)
+        {
+            coolTimeQ = slot.assignedSkill.CoolTime;
+        }
+        if(index == 1)
+        {
+            coolTimeW = slot.assignedSkill.CoolTime;
+        }
+        if(index == 2)
+        {
+            coolTimeE = slot.assignedSkill.CoolTime;
+        }
+        if(index == 3)
+        {
+            coolTimeR = slot.assignedSkill.CoolTime;
+        }
+    }
+    private void CTCounter()
+    {
+        coolTimeQ -= Time.deltaTime;
+        coolTimeW -= Time.deltaTime;
+        coolTimeE -= Time.deltaTime;
+        coolTimeR -= Time.deltaTime;
+    }
     /// <summary>
     /// スロット番号を指定して登録（必要なら使用）
     /// </summary>
