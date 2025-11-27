@@ -14806,6 +14806,8 @@ MonoBehaviour:
   parameter: {fileID: 0}
   skillExecutor: {fileID: 0}
   player: {fileID: 0}
+  timer: 0
+  enemyMaster: {fileID: 0}
   moveSpeed: 3
   detectionRange: 15
   attackRange: 5

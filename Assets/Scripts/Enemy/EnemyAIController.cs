@@ -43,7 +43,6 @@ public abstract class EnemyAIController : MonoBehaviour
             return;
 
         Think();
-        Debug.Log(timer);
     }
     public void TimerSetter()
     {
