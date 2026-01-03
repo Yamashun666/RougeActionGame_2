@@ -5,7 +5,6 @@ using UnityEngine.EventSystems;
 public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     [Header("UI構成")]
-    public Image iconImage;
     public Image highlightFrame;
     public int slotIndex;
     public SkillData assignedSkill{ get; private set; }
@@ -19,6 +18,11 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
     private Vector2 originalPosition;
     private bool isDragging = false;
     private PlayerController playerController;
+    public SkillUIManager skillUIManager;
+    [Header("UI")]
+    public TMPro.TextMeshProUGUI skillNameText;
+    public UnityEngine.UI.Image cooldownMask;
+    public Image iconImage;
 
     private void Awake()
     {
@@ -72,8 +76,13 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
                 Debug.Log("[SkillSlotUI] JetBoostスキル検出 → isJetBoostActive = TRUE");
             }
         }
-    }
 
+    }
+    public void ReplaceSkill(SkillData newSkill)
+    {
+        assignedSkill = newSkill;
+        RefreshUI();
+    }
     public void ClearSlot()
     {
         assignedSkill = null;
@@ -85,7 +94,21 @@ public class SkillSlotUI : MonoBehaviour, IDropHandler, IBeginDragHandler, IDrag
             iconImage.color = new Color(1, 1, 1, 0);
         }
     }
+    private void RefreshUI()
+    {
+        if (assignedSkill == null)
+        {
+            iconImage.enabled = false;
+            skillNameText.text = "";
+            return;
+        }
 
+        iconImage.enabled = true;
+        iconImage.sprite = Resources.Load<Sprite>(assignedSkill.SkillIcon);
+        skillNameText.text = assignedSkill.SkillName;
+
+        // クールタイムUI初期化などもここ
+    }
     // alias互換用
     public void ClearSkill() => ClearSlot();
 

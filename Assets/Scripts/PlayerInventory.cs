@@ -57,6 +57,17 @@ public class PlayerInventory : MonoBehaviour
         }
 
     }
+    public bool CanPay(int cost)
+    {
+        return coinCount >= cost;
+    }
+
+    public void Pay(int cost)
+    {
+        coinCount -= cost;
+        OnCoinChanged?.Invoke(coinCount);
+    }
+
     public void AddItem(string itemName, int value)
     {
         if (itemName == "Coin")
