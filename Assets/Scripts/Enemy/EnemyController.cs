@@ -7,6 +7,7 @@ public class EnemyController : MonoBehaviour
     public float moveSpeed = 2f;
     private Rigidbody2D rb;
     private ParameterBase parameter;
+    public Transform magicOrigin;
 
     void Start()
     {

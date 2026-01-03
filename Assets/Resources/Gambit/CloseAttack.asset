@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CloseAttack
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGambitSO
   gambitName: CloseAttack
-  priority: 1000
+  priority: 10000
   flagNum: 2
   targetNum: 1
   targetPoint: 3

@@ -16,6 +16,6 @@ MonoBehaviour:
   priority: 1500
   flagNum: 2
   targetNum: 1
-  targetPoint: 5
+  targetPoint: 10
   callActionCode: 0006_01
   note: 

@@ -36,7 +36,7 @@ public class ParameterBase : MonoBehaviour
     public Vector3 Position => ModelRoot ? ModelRoot.position : transform.position;
     public event Action OnDeath;
     public DamagePopupSpawner popupSpawner;
-    public  EnemyMaster enemyMaster ;
+    public  EnemyMaster enemyMaster;
 
 
 

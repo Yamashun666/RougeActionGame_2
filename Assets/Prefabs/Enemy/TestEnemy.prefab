@@ -1053,6 +1053,37 @@ SpriteMask:
   m_IsCustomRangeActive: 1
   m_SpriteSortPoint: 0
   m_MaskSource: 0
+--- !u!1 &899742080167649673
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1359554666458614177}
+  m_Layer: 0
+  m_Name: MagicOrigin (1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1359554666458614177
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 899742080167649673}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1, y: 1.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2478598881391213043}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &952616445907548451
 GameObject:
   m_ObjectHideFlags: 0
@@ -14326,6 +14357,7 @@ Transform:
   - {fileID: 833211764260063266}
   - {fileID: 4646104784426600793}
   - {fileID: 66744824599132380}
+  - {fileID: 1359554666458614177}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3490105719607399112
@@ -14813,7 +14845,7 @@ MonoBehaviour:
   detectionRange: 15
   attackRange: 5
   stopDistance: 1
-  gambitSet: {fileID: 11400000, guid: ccc857f8c493528428a9bcf6de3aefb6, type: 2}
+  gambitSet: {fileID: 11400000, guid: 92dc499148624424b94a68ea06993d8f, type: 2}
   evaluateInterval: 0.5
 --- !u!114 &3917290683721874300
 MonoBehaviour:

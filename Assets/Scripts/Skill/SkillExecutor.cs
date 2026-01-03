@@ -83,10 +83,10 @@ public class SkillExecutor : MonoBehaviour
         }
 
         // 各種効果適用
-        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, damageable, instance);
-        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, damageable, instance);
-        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, damageable, instance);
-        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, damageable, instance);
+        ApplyEffectAmount(instance.Data.SkillType001, instance.Data, instance.Target, instance.Caster, damageable, instance);
+        ApplyEffectAmount(instance.Data.SkillType002, instance.Data, instance.Target, instance.Caster, damageable, instance);
+        ApplyEffectAmount(instance.Data.SkillType003, instance.Data, instance.Target, instance.Caster, damageable, instance);
+        ApplyEffectAmount(instance.Data.SkillType004, instance.Data, instance.Target, instance.Caster, damageable, instance);
 
         // 攻撃スキルならヒットボックス起動
         if (IsAttackSkill(instance.Data))
@@ -136,7 +136,7 @@ public class SkillExecutor : MonoBehaviour
     }
 
 
-    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target, Damageable damageable, SkillInstance instance)
+    private void ApplyEffectAmount(int skillType, SkillData skill, ParameterBase target,ParameterBase caster, Damageable damageable, SkillInstance instance)
     {
         if (skillType == 0) return; // スキル未設定行をスキップ
 
@@ -180,7 +180,7 @@ public class SkillExecutor : MonoBehaviour
 
             case SkillType.RangedMagic:
                 Debug.Log("[SkillExecutor.ApplyEffectAmount]Called RangedMagic");
-                ExecuteProjectile(skill, target);
+                ExecuteProjectile(skill, caster);
                 break;
 
             case SkillType.DrainAttack:
@@ -258,50 +258,113 @@ public class SkillExecutor : MonoBehaviour
             Debug.LogWarning("[SkillExecutor] SkillEffectPlayer.Instance が存在しません。シーンに配置されていますか？");
         }
     }
+
     private void ExecuteProjectile(SkillData skill, ParameterBase caster)
     {
         Debug.Log("[ExecuteProjectile] 呼ばれた");
 
-        if (skill == null || skill.ProjectilePrefab == null)
+        if (skill == null)
         {
-            Debug.LogError("[ExecuteProjectile] skill または projectilePrefab が null");
+            Debug.LogError("[ExecuteProjectile] skill が null");
+            return;
+        }
+        if (skill.ProjectilePrefab == null)
+        {
+            Debug.LogError("[ExecuteProjectile] ProjectilePrefab が null（SkillDataにPrefab入ってない）");
+            return;
+        }
+        if (caster == null)
+        {
+            Debug.LogError("[ExecuteProjectile] caster が null（ExecuteSkillの呼び出し or ApplyEffectAmountの引数が死んでる）");
             return;
         }
 
-        PlayerController player = FindObjectOfType<PlayerController>();
-        if (player == null || player.magicOrigin == null)
+        // -------------------------
+        // 発射起点（origin）を決める
+        // -------------------------
+        Transform origin = null;
+
+        // Playerなら magicOrigin を使う
+        var pc = caster.GetComponent<PlayerController>();
+        if (pc != null && pc.magicOrigin != null)
         {
-            Debug.LogError("[ExecuteProjectile] PlayerController または magicOrigin が null");
-            return;
+            origin = pc.magicOrigin;
+        }
+        else
+        {
+            // Enemyなら「casterの子に ProjectileOrigin を置く」運用にするのが安定
+            var originMarker = caster.GetComponentInChildren<ProjectileOrigin>();
+            if (originMarker != null) origin = originMarker.transform;
         }
 
-        // 🖱️ マウス座標をスクリーン→ワールドへ変換
-        Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
-        Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
-        mouseWorldPos.z = 0f;
+        if (origin == null)
+        {
+            // 最悪 caster の位置で撃つ
+            Debug.LogWarning("[ExecuteProjectile] origin が見つからないので caster.transform を使用");
+            origin = caster.transform;
+        }
 
-        // 🎯 発射方向を計算
-        Vector2 direction = (mouseWorldPos - player.magicOrigin.position).normalized;
-        Debug.Log($"[ExecuteProjectile] 発射方向ベクトル: {direction}");
+        // -------------------------
+        // 発射方向（direction）を決める
+        // -------------------------
+        Vector2 direction;
 
-        // 🧩 Projectile生成
-        GameObject projectile = Instantiate(skill.ProjectilePrefab, player.magicOrigin.position, Quaternion.identity);
+        if (pc != null)
+        {
+            // Player：マウス方向
+            if (Camera.main == null)
+            {
+                Debug.LogError("[ExecuteProjectile] Camera.main が null");
+                return;
+            }
+
+            Vector3 mouseScreenPos = Mouse.current.position.ReadValue();
+            Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(mouseScreenPos);
+            mouseWorldPos.z = 0f;
+
+            direction = (mouseWorldPos - origin.position).normalized;
+        }
+        else
+        {
+            // Enemy：プレイヤー方向
+            var player = FindFirstObjectByType<PlayerController>();
+            if (player == null)
+            {
+                Debug.LogError("[ExecuteProjectile] PlayerController が見つからない");
+                return;
+            }
+
+            direction = ((Vector2)player.transform.position - (Vector2)origin.position).normalized;
+        }
+
+        if (direction.sqrMagnitude < 0.0001f)
+        {
+            // 万一同座標なら右向きにしておく
+            direction = Vector2.right;
+        }
+
+        // -------------------------
+        // ★弾の生成（ここが肝）
+        // -------------------------
+        GameObject projectile = Instantiate(skill.ProjectilePrefab, origin.position, Quaternion.identity);
+        Debug.Log($"[ExecuteProjectile] Projectile生成: {projectile.name}");
 
         var proj = projectile.GetComponent<MagicProjectile>();
         if (proj == null)
         {
-            Debug.LogError("[ExecuteProjectile] MagicProjectile スクリプトがPrefabにアタッチされていません！");
+            Debug.LogError("[ExecuteProjectile] MagicProjectile がPrefabに付いてない");
+            Destroy(projectile);
             return;
         }
 
-        // 初期化（directionをベクトルで渡す）
+        // 初期化：あなたの現行に合わせて Vector2 direction を渡す
         proj.Initialize(skill, caster, direction);
 
-        // 弾の見た目を回転（向いてる方向に合わせる）
+        // 見た目の回転
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         projectile.transform.rotation = Quaternion.Euler(0, 0, angle);
 
-        Debug.Log("[ExecuteProjectile] マウス方向に発射完了");
+        Debug.Log($"[ExecuteProjectile] 発射完了 dir={direction}");
     }
 
     private bool IsAttackSkill(SkillData skill)

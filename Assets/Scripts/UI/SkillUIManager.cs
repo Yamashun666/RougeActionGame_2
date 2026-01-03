@@ -31,6 +31,16 @@ public class SkillUIManager : MonoBehaviour
         {
             Debug.LogWarning("[SkillUIManager] slots が設定されていません。Inspectorで4つの SkillSlotUI を割り当ててください。");
         }
+            if (PlayerExecutor == null)
+        PlayerExecutor = FindFirstObjectByType<PlayerController>()?.GetComponent<SkillExecutor>();
+
+        if (executor == null)
+            executor = PlayerExecutor; // executor は PlayerExecutor を使う
+
+        if (playerParameter == null)
+            playerParameter = FindFirstObjectByType<PlayerController>()?.GetComponent<ParameterBase>();
+
+        Debug.Log($"[SkillUIManager] executor={(executor ? executor.name : "null")}, playerParameter={(playerParameter ? playerParameter.name : "null")}");
     }
         void Update()
     {
@@ -121,6 +131,7 @@ public class SkillUIManager : MonoBehaviour
             }
         }
         CTSetter(index,slot);
+        Debug.Log($"[TryUseSkill] executor={executor?.name}, caster={playerParameter?.name}, skill={slot.assignedSkill?.SkillName}");
     }
     public void CTSetter(int index,SkillSlotUI slot)
     {

@@ -32,6 +32,12 @@ public class MagicProjectile : MonoBehaviour
     }
     void OnTriggerEnter2D(Collider2D col)
     {
+        // ✅ 自分自身（発射者）に当たったら無視
+        if (caster != null)
+        {
+            var hitParam = col.GetComponentInParent<ParameterBase>();
+            if (hitParam == caster) return;
+        }
         if (col.CompareTag("Enemy"))
         {
             ParameterBase enemyParam = col.GetComponent<ParameterBase>();
@@ -39,6 +45,19 @@ public class MagicProjectile : MonoBehaviour
             {
                 int damage = skillData.EffectAmount001;
                 enemyParam.TakeDamage(damage);
+                Debug.Log($"[MagicProjectile] {skillData.SkillName} hit! damage={damage}");
+            }
+
+            // VFXやヒット効果再生もここで
+            Destroy(gameObject);
+        }
+        if (col.CompareTag("Player"))
+        {
+            ParameterBase playerParam = col.GetComponent<ParameterBase>();
+            if (playerParam != null)
+            {
+                int damage = skillData.EffectAmount001;
+                playerParam.TakeDamage(damage);
                 Debug.Log($"[MagicProjectile] {skillData.SkillName} hit! damage={damage}");
             }
 
